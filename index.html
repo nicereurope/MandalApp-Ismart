@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Zen Art Therapy & Coloring App</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&family=Patrick+Hand&family=Gloria+Hallelujah&family=Gochi+Hand&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              // Screen 1 Palette
+              "art-paper": "#FFFAF5",
+              "art-ink": "#1A1A1A",
+              "art-night": "#0F1221",
+              "art-surface-dark": "#181E36",
+              "vibrant-blue": "#2563EB",
+              "vibrant-orange": "#F97316",
+              "vibrant-yellow": "#FACC15",
+              "vibrant-pink": "#EC4899",
+              "vibrant-teal": "#0D9488",
+              "s1-primary": "#4F46E5",
+              "s1-primary-dark": "#3730A3",
+              "s1-primary-light": "#818CF8",
+
+              // Screen 2 Palette
+              "s2-primary": "#4ECDC4", 
+              "s2-primary-dark": "#2B8C86",
+              "s2-accent-pink": "#FF6B6B",
+              "s2-accent-yellow": "#FFE66D",
+              "s2-background-light": "#fdfbf7",
+              "s2-background-dark": "#1a1e23",
+              "s2-surface-light": "#ffffff",
+              "s2-surface-dark": "#23282e",
+
+              // Screen 3 Palette
+              "g-dark": "#0F111A",
+              "g-blue": "#1B2A4E",
+              "g-yellow": "#FFD23F",
+              "g-pink": "#EE4266",
+              "g-paper": "#F9F7F2",
+
+              // Screen 4 Palette
+              "s4-primary": "#FF9F1C",
+              "s4-primary-dark": "#F27D0C",
+              "s4-secondary": "#4361EE",
+              "s4-secondary-dark": "#3046C4",
+              "s4-background-light": "#FFFBF5",
+              "s4-background-dark": "#0B1120",
+              "s4-surface-dark": "#162036",
+              "s4-surface-light": "#ffffff",
+            },
+            fontFamily: {
+              "sans": ["Spline Sans", "Lexend", "sans-serif"],
+              "display": ["Lexend", "sans-serif"],
+              "hand": ["Patrick Hand", "cursive"],
+              "handwritten": ["Gloria Hallelujah", "cursive"],
+              "marker": ["'Gochi Hand'", "cursive"],
+            },
+            borderRadius: {
+              "3xl": "1.5rem",
+              "4xl": "2rem", 
+              "blob": "2rem 1.5rem 2.2rem 1.8rem",
+              "organic": "20px 25px 20px 25px",
+            },
+            boxShadow: {
+                'glow': '0 0 20px -5px var(--tw-shadow-color)',
+                'glow-lg': '0 0 40px -10px var(--tw-shadow-color)',
+                'organic': '0 4px 20px -2px rgba(0, 0, 0, 0.1), 0 2px 10px -2px rgba(0, 0, 0, 0.05)',
+                'organic-hover': '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 5px 15px -5px rgba(0, 0, 0, 0.08)',
+                'hand-drawn': '3px 4px 0px 0px rgba(0,0,0,0.15)',
+                'hand-drawn-dark': '3px 4px 0px 0px rgba(0,0,0,0.4)',
+            },
+            animation: {
+                'fade-fill': 'fadeIn 300ms ease-out forwards',
+                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'float': 'float 6s ease-in-out infinite'
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
+                },
+                float: {
+                    '0%, 100%': { transform: 'translateY(0)' },
+                    '50%': { transform: 'translateY(-10px)' },
+                }
+            }
+          },
+        },
+      }
+    </script>
+
+    <style>
+        /* Shared & Utility CSS */
+        body { font-family: 'Lexend', sans-serif; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; border: 3px solid #FFFAF5; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; border: 3px solid #0F1221; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Organic Shapes */
+        .organic-border { border-radius: 25px 20px 28px 22px / 22px 28px 20px 25px; }
+        .organic-shape { border-radius: 40% 60% 70% 30%/40% 50% 60% 50%; transition: all 0.5s ease-in-out }
+        .organic-shape:hover { border-radius: 60% 40% 30% 70%/50% 40% 50% 60% }
+        .organic-border-2 { border-radius: 25px 225px 25px 255px / 225px 25px 255px 25px; }
+        
+        /* Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 48px; margin: 0; padding: 0; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 12px; cursor: pointer; background: #cbd5e1; border-radius: 999px; border: 2px solid transparent; }
+        .dark input[type=range]::-webkit-slider-runnable-track { background: #334155; border-color: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 48px; width: 48px; border-radius: 50%; background: #FF9F1C; cursor: pointer; margin-top: -20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 4px solid #ffffff; transition: transform 0.1s ease; }
+        .dark input[type=range]::-webkit-slider-thumb { border-color: #1e293b; background: #FF9F1C; }
+        
+        /* Pattern */
+        .pattern-dot { background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); background-size: 24px 24px; }
+        .dark .pattern-dot { background-image: radial-gradient(#374151 1.5px, transparent 1.5px); }
+        
+        .card-hover .artwork-line { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover .artwork-line { stroke: #4F46E5; stroke-width: 3px; }
+        .dark .card-hover:hover .artwork-line { stroke: #FACC15; filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.5)); }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
