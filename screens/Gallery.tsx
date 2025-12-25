@@ -183,7 +183,13 @@ const ScreenGallery: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCreations(data || []);
+
+      // Deduplicate by ID (in case there are duplicate entries in DB)
+      const uniqueCreations = data ? Array.from(
+        new Map(data.map(item => [item.id, item])).values()
+      ) : [];
+
+      setCreations(uniqueCreations);
     } catch (error: any) {
       console.error('Error loading creations:', error);
       setMessage('Error al cargar tus creaciones');
