@@ -691,6 +691,9 @@ const ScreenHome: React.FC = () => {
         <p style={{ margin: '8px 0 0 0', fontFamily: 'monospace' }}>
           Deploy: <strong>v20f59fd</strong> | Build: 2025-12-25 13:55
         </p>
+        <p style={{ margin: '4px 0 0 0', fontFamily: 'monospace', fontSize: '11px' }}>
+          Theme: {document.documentElement.classList.contains('dark') ? 'Dark 🌙' : 'Light ☀️'}
+        </p>
       </footer>
     </div>
   );
