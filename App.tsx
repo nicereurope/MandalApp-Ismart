@@ -9,6 +9,7 @@ import ScreenSettings from './screens/Settings';
 import ScreenAuth from './screens/Auth';
 import ScreenAdmin from './screens/Admin';
 import ScreenGallery from './screens/Gallery';
+import './src/styles/minimal.css';
 
 const App: React.FC = () => {
   return (
