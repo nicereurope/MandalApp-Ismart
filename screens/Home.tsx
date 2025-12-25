@@ -1,116 +1,704 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ArtCard from '../components/ArtCard';
+import HeartIcon from '../components/HeartIcon';
+import { useAuth } from '../context/AuthContext';
+import { supabase, SvgTemplate } from '../lib/supabase';
+import '../styles/minimal.css';
 
-const GalleryHeader: React.FC = () => {
+const MinimalHeader: React.FC = () => {
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/50 dark:border-slate-800/50 bg-art-paper/90 dark:bg-art-night/90 backdrop-blur-xl transition-colors duration-300">
-      <div className="px-4 md:px-8 py-3 flex items-center justify-between max-w-[1440px] mx-auto min-h-[80px]">
-        <Link to="/" className="flex items-center gap-3 group cursor-pointer p-2 -ml-2 rounded-2xl hover:bg-orange-50 dark:hover:bg-white/5 transition-colors">
-          <div className="size-12 text-vibrant-orange dark:text-vibrant-yellow transform group-hover:rotate-12 transition-transform duration-300">
-            <svg className="w-full h-full drop-shadow-sm" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-              <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
-            </svg>
+    <header style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
+      background: 'var(--color-bg-primary)',
+      borderBottom: '1px solid var(--color-border-light)',
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '20px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        {/* Logo */}
+        <Link to="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          textDecoration: 'none',
+          color: 'inherit'
+        }}>
+          <div style={{ width: '40px', height: '40px' }}>
+            <HeartIcon filled={true} size={40} />
           </div>
-          <h1 className="text-3xl font-bold leading-none tracking-wide text-art-ink dark:text-white pt-1 font-hand">
+          <h1 style={{
+            fontSize: '24px',
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            margin: 0
+          }}>
             Ismael Gudiño
-            <span className="block text-sm font-sans font-normal text-slate-500 dark:text-slate-400 -mt-1 tracking-normal opacity-80">Art Therapy</span>
           </h1>
         </Link>
-        <nav className="flex items-center gap-4">
-          <Link to="/settings" className="hidden md:flex items-center justify-center h-12 px-6 rounded-full bg-white dark:bg-white/5 border-2 border-slate-200 dark:border-white/10 hover:border-vibrant-blue dark:hover:border-vibrant-blue text-slate-700 dark:text-slate-200 font-medium transition-all text-base shadow-sm hover:shadow-md gap-2">
-            <span className="material-symbols-outlined">settings</span>
-            Ajustes
-          </Link>
-          <button aria-label="Menu" className="size-14 flex items-center justify-center rounded-full text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 border-2 border-slate-100 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors md:hidden">
-            <span className="material-symbols-outlined text-3xl">menu</span>
-          </button>
+
+        {/* Desktop Navigation */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {user ? (
+            <>
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                style={{
+                  display: 'none',
+                  '@media (max-width: 640px)': {
+                    display: 'flex'
+                  }
+                }}
+                className="sm:hidden minimal-button-secondary"
+              >
+                <span className="material-symbols-outlined">
+                  {mobileMenuOpen ? 'close' : 'menu'}
+                </span>
+              </button>
+
+              {/* Desktop Buttons */}
+              <button
+                onClick={() => navigate('/gallery')}
+                className="hidden sm:flex minimal-button-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
+                <span>Mis Obras</span>
+              </button>
+
+              {isAdmin && (
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="hidden sm:flex minimal-button-primary"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>admin_panel_settings</span>
+                  <span>Admin</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => signOut()}
+                className="hidden sm:flex minimal-button-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
+                <span>Salir</span>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className="minimal-button-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
+              <span>Login</span>
+            </button>
+          )}
         </nav>
       </div>
+
+      {/* Mobile Menu */}
+      {user && mobileMenuOpen && (
+        <div className="sm:hidden" style={{
+          borderTop: '1px solid var(--color-border)',
+          padding: '16px',
+          background: 'var(--color-bg-primary)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <button
+            onClick={() => {
+              navigate('/gallery');
+              setMobileMenuOpen(false);
+            }}
+            className="minimal-button-secondary"
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+          >
+            <span className="material-symbols-outlined">photo_library</span>
+            Mis Obras
+          </button>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                navigate('/admin');
+                setMobileMenuOpen(false);
+              }}
+              className="minimal-button-primary"
+              style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+            >
+              <span className="material-symbols-outlined">admin_panel_settings</span>
+              Admin
+            </button>
+          )}
+          <button
+            onClick={() => {
+              signOut();
+              setMobileMenuOpen(false);
+            }}
+            className="minimal-button-secondary"
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626' }}
+          >
+            <span className="material-symbols-outlined">logout</span>
+            Cerrar Sesión
+          </button>
+        </div>
+      )}
     </header>
   );
 };
 
 const ScreenHome: React.FC = () => {
   const navigate = useNavigate();
+  const [templates, setTemplates] = useState<SvgTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [publicWorks, setPublicWorks] = useState<any[]>([]);
+  const [publicWorksLoading, setPublicWorksLoading] = useState(true);
+  const [selectedWork, setSelectedWork] = useState<any | null>(null);
+  const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('svg_templates')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setTemplates(data || []);
+      } catch (error) {
+        console.error('Error loading templates:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, []);
+
+  // Load public works
+  useEffect(() => {
+    const loadPublicWorks = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_creations')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false })
+          .limit(12);
+
+        if (error) throw error;
+        setPublicWorks(data || []);
+      } catch (error) {
+        console.error('Error loading public works:', error);
+      } finally {
+        setPublicWorksLoading(false);
+      }
+    };
+
+    loadPublicWorks();
+  }, []);
+
+  // Load user's likes
+  useEffect(() => {
+    const loadUserLikes = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('artwork_likes')
+          .select('creation_id')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const likedIds = new Set(data?.map(like => like.creation_id) || []);
+        setUserLikes(likedIds);
+      } catch (error) {
+        console.error('Error loading user likes:', error);
+      }
+    };
+
+    loadUserLikes();
+  }, [user]);
+
+  // Get unique categories from templates
+  const categories = Array.from(new Set(templates.map(t => t.category))).sort();
+
+  // Apply filters
+  const filteredTemplates = templates.filter(template => {
+    if (searchTerm && !template.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+    if (selectedDifficulty && template.difficulty !== selectedDifficulty) {
+      return false;
+    }
+    if (selectedCategory && template.category !== selectedCategory) {
+      return false;
+    }
+    return true;
+  });
+
+  const handleLike = async (creationId: string) => {
+    if (!user) {
+      alert('Debes iniciar sesión para dar like');
+      return;
+    }
+
+    try {
+      const isLiked = userLikes.has(creationId);
+
+      if (isLiked) {
+        const newLikes = new Set(userLikes);
+        newLikes.delete(creationId);
+        setUserLikes(newLikes);
+
+        await supabase
+          .from('artwork_likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('creation_id', creationId);
+
+        await supabase.rpc('decrement_likes', { creation_id: creationId });
+      } else {
+        const newLikes = new Set(userLikes);
+        newLikes.add(creationId);
+        setUserLikes(newLikes);
+
+        await supabase
+          .from('artwork_likes')
+          .insert({ user_id: user.id, creation_id: creationId });
+
+        await supabase.rpc('increment_likes', { creation_id: creationId });
+      }
+
+      const { data } = await supabase
+        .from('user_creations')
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      setPublicWorks(data || []);
+
+      if (selectedWork && selectedWork.id === creationId) {
+        const updated = data?.find(w => w.id === creationId);
+        if (updated) setSelectedWork(updated);
+      }
+    } catch (error) {
+      console.error('Error liking work:', error);
+    }
+  };
+
   return (
-    <div className="bg-art-paper dark:bg-art-night min-h-screen flex flex-col text-art-ink dark:text-slate-100 transition-colors duration-300 font-sans">
-      <GalleryHeader />
-      <main className="flex-grow flex flex-col w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8 md:py-12">
-        <div className="flex flex-col items-center justify-center py-10 md:py-16 space-y-6 max-w-4xl mx-auto text-center relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-r from-vibrant-blue/5 via-vibrant-pink/5 to-vibrant-yellow/5 dark:from-vibrant-blue/10 dark:via-vibrant-pink/10 dark:to-vibrant-yellow/10 blur-3xl -z-10 rounded-full"></div>
-          <h2 className="text-art-ink dark:text-white text-5xl md:text-7xl font-bold leading-[1.1] tracking-wide drop-shadow-sm font-hand">
-            Galería de <span className="text-transparent bg-clip-text bg-gradient-to-r from-vibrant-blue to-vibrant-pink">Arte Zen</span>
-          </h2>
-          <p className="text-slate-600 dark:text-slate-300 text-xl md:text-2xl font-light leading-relaxed max-w-2xl font-hand">
-            "Encuentra tu centro. El color es el lugar donde nuestro cerebro y el universo se encuentran."
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--color-bg-secondary)',
+      fontFamily: 'var(--font-primary)'
+    }}>
+      <MinimalHeader />
+
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+        {/* Hero Section */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '64px',
+          maxWidth: '800px',
+          margin: '0 auto 64px'
+        }}>
+          <h1 className="text-hero" style={{
+            marginBottom: '24px',
+            color: 'var(--color-text-primary)'
+          }}>
+            Galería de <span style={{ color: 'var(--color-accent-primary)' }}>Arte Zen</span>
+          </h1>
+          <p className="text-body" style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: '18px',
+            lineHeight: '1.6'
+          }}>
+            Encuentra tu centro. El color es el lugar donde nuestro cerebro y el universo se encuentran.
           </p>
         </div>
 
+        {/* Search Bar */}
+        <div style={{ marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px' }}>
+          <input
+            type="text"
+            placeholder="Buscar plantillas..."
+            className="minimal-input"
+            style={{ width: '100%' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         {/* Filters */}
-        <div className="sticky top-[85px] z-40 py-6 -mx-4 px-4 md:-mx-8 md:px-8 transition-all duration-300 bg-art-paper/95 dark:bg-art-night/95 backdrop-blur-md border-b border-transparent">
-          <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center w-full max-w-[1440px] mx-auto">
-            <div className="relative group w-full lg:w-96">
-              <span className="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-3xl group-focus-within:text-vibrant-blue transition-colors">search</span>
-              <input aria-label="Search artworks" className="w-full h-16 bg-white dark:bg-art-surface-dark border-2 border-slate-200 dark:border-slate-700 rounded-full py-3 pl-14 pr-6 text-lg text-art-ink dark:text-white placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-vibrant-blue/20 focus:border-vibrant-blue transition-all shadow-sm" placeholder="Buscar por tema..." type="text" />
+        <div style={{
+          marginBottom: '48px',
+          display: 'flex',
+          gap: '24px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
+        }}>
+          <div>
+            <p className="text-small" style={{
+              marginBottom: '12px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontSize: '12px'
+            }}>
+              Dificultad
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Principiante' ? null : 'Principiante')}
+                className={selectedDifficulty === 'Principiante' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+              >
+                Inicial
+              </button>
+              <button
+                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Intermedio' ? null : 'Intermedio')}
+                className={selectedDifficulty === 'Intermedio' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+              >
+                Intermedio
+              </button>
+              <button
+                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Avanzado' ? null : 'Avanzado')}
+                className={selectedDifficulty === 'Avanzado' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+              >
+                Avanzado
+              </button>
             </div>
-            <div className="flex flex-col sm:flex-row gap-6 flex-1 w-full lg:w-auto overflow-x-auto pb-4 sm:pb-0 no-scrollbar items-start sm:items-center justify-end">
-              <div className="flex flex-col gap-3 shrink-0">
-                <span className="text-sm font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-2">Dificultad</span>
-                <div className="flex gap-2">
-                  <button className="h-12 px-6 rounded-full text-base font-hand font-bold bg-vibrant-teal/10 text-teal-800 dark:text-teal-300 border-2 border-vibrant-teal hover:bg-vibrant-teal hover:text-white transition-all focus:ring-4 ring-teal-500/30">Inicial</button>
-                  <button className="h-12 px-6 rounded-full text-base font-hand font-bold bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-vibrant-teal hover:text-vibrant-teal dark:hover:text-vibrant-teal transition-all">Intermedio</button>
-                </div>
-              </div>
-              <div className="hidden sm:block w-px h-12 bg-slate-200 dark:bg-slate-700 mx-2"></div>
-              <div className="flex flex-col gap-3 shrink-0">
-                <span className="text-sm font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-2">Ánimo</span>
-                <div className="flex gap-2">
-                  <button className="flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-white dark:bg-white/5 border-2 border-slate-200 dark:border-slate-700 hover:border-vibrant-blue hover:bg-vibrant-blue/5 transition-all group active:scale-95">
-                    <span className="material-symbols-outlined text-2xl text-vibrant-blue group-hover:scale-110 transition-transform">nights_stay</span>
-                    <span className="text-base font-hand font-bold text-slate-600 dark:text-slate-300 group-hover:text-vibrant-blue">Calma</span>
-                  </button>
-                  <button className="flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-white dark:bg-white/5 border-2 border-slate-200 dark:border-slate-700 hover:border-vibrant-orange hover:bg-vibrant-orange/5 transition-all group active:scale-95">
-                    <span className="material-symbols-outlined text-2xl text-vibrant-orange group-hover:scale-110 transition-transform">wb_sunny</span>
-                    <span className="text-base font-hand font-bold text-slate-600 dark:text-slate-300 group-hover:text-vibrant-orange">Foco</span>
-                  </button>
-                </div>
-              </div>
+          </div>
+
+          <div>
+            <p className="text-small" style={{
+              marginBottom: '12px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontSize: '12px'
+            }}>
+              Categorías
+            </p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={selectedCategory === null ? 'minimal-button-primary' : 'minimal-button-secondary'}
+              >
+                Todas
+              </button>
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                  className={selectedCategory === category ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-6 pb-32">
-          <ArtCard
-            title="Mandala Solar" level="INICIAL" category="Patrones Geométricos"
-            svgContent='<svg class="w-full h-full stroke-slate-400 dark:stroke-slate-500 artwork-line" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="80"></circle><path d="M100 20 L100 180 M20 100 L180 100 M43 43 L157 157 M157 43 L43 157"></path><circle cx="100" cy="100" r="40"></circle></svg>'
-          />
-          <ArtCard
-            title="Hoja de Vida" level="INTERMEDIO" category="Naturaleza"
-            svgContent='<svg class="w-full h-full stroke-slate-400 dark:stroke-slate-500 artwork-line" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 180 Q140 120 100 60 Q60 120 100 180 Z"></path><path d="M100 180 Q160 140 140 80"></path><path d="M100 180 Q40 140 60 80"></path><path d="M100 120 L140 100 M100 140 L60 120"></path></svg>'
-          />
-          <ArtCard
-            title="Búho Nocturno" level="INICIAL" category="Animales"
-            svgContent='<svg class="w-full h-full stroke-slate-400 dark:stroke-slate-500 artwork-line" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="80" r="20"></circle><circle cx="140" cy="80" r="20"></circle><path d="M60 80 L60 82 M140 80 L140 82" stroke-width="4"></path><path d="M100 120 L90 140 L110 140 Z"></path><path d="M40 40 Q20 80 40 140 Q100 180 160 140 Q180 80 160 40 Q100 10 40 40"></path></svg>'
-          />
-          <ArtCard
-            title="Cumbres Andinas" level="AVANZADO" category="Paisajes"
-            svgContent='<svg class="w-full h-full stroke-slate-400 dark:stroke-slate-500 artwork-line" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M20 150 L60 80 L100 150 L140 60 L180 150"></path><circle cx="160" cy="40" r="15"></circle><path d="M20 150 H180"></path><path d="M40 150 L60 180 L140 180 L160 150"></path></svg>'
-          />
+        {/* Templates Grid - Masonry */}
+        <div className="masonry-grid" style={{ marginBottom: '80px' }}>
+          {loading ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: '80px 0',
+              color: 'var(--color-text-secondary)'
+            }}>
+              Cargando plantillas...
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: '80px 0',
+              color: 'var(--color-text-secondary)'
+            }}>
+              No se encontraron resultados
+            </div>
+          ) : (
+            filteredTemplates.map((template) => (
+              <div key={template.id} className="masonry-item">
+                <ArtCard
+                  id={template.id}
+                  title={template.title}
+                  level={template.difficulty.toUpperCase()}
+                  category={template.category}
+                  svgContent={template.svg_content}
+                  backgroundColor={template.background_color}
+                />
+              </div>
+            ))
+          )}
         </div>
+
+        {/* Community Gallery */}
+        {publicWorks.length > 0 && (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+              <h2 className="text-h1" style={{ marginBottom: '16px' }}>
+                🎨 Galería Comunitaria
+              </h2>
+              <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
+                Descubre las increíbles obras creadas por nuestra comunidad
+              </p>
+            </div>
+
+            <div className="instagram-grid">
+              {publicWorksLoading ? (
+                <div style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '48px 0',
+                  color: 'var(--color-text-secondary)'
+                }}>
+                  Cargando obras...
+                </div>
+              ) : (
+                publicWorks.map((work) => (
+                  <div
+                    key={work.id}
+                    className="minimal-card animate-fade-in"
+                    onClick={() => setSelectedWork(work)}
+                    style={{
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      padding: 0
+                    }}
+                  >
+                    <div style={{
+                      aspectRatio: '1/1',
+                      background: 'var(--color-bg-tertiary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden'
+                    }}>
+                      <img
+                        src={work.colored_svg}
+                        alt={work.title || 'Community artwork'}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      />
+                    </div>
+                    <div style={{ padding: '16px' }}>
+                      <h3 className="text-h3" style={{
+                        marginBottom: '4px',
+                        fontSize: '16px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {work.title || 'Sin título'}
+                      </h3>
+                      <p className="text-small" style={{ color: 'var(--color-text-secondary)' }}>
+                        {work.show_author ? 'Por autor' : 'Anónimo'}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </main>
-      <button onClick={() => navigate('/coloring')} className="fixed bottom-10 right-10 z-50 bg-gradient-to-r from-vibrant-blue to-vibrant-pink hover:from-blue-600 hover:to-pink-600 text-white p-5 rounded-full shadow-glow-lg shadow-vibrant-blue/50 hover:scale-105 transition-all duration-300 group flex items-center gap-3 pr-8 focus:ring-4 ring-offset-2 ring-vibrant-blue">
-        <span className="material-symbols-outlined text-3xl animate-pulse">casino</span>
-        <span className="text-xl font-hand font-bold">¡Sorpréndeme!</span>
+
+      {/* Surprise Button */}
+      <button
+        onClick={() => {
+          if (templates.length > 0) {
+            const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+            navigate(`/coloring?template=${randomTemplate.id}`);
+          }
+        }}
+        className="minimal-button-primary"
+        style={{
+          position: 'fixed',
+          bottom: '32px',
+          right: '32px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: 'var(--shadow-lg)',
+          zIndex: 40
+        }}
+      >
+        <span className="material-symbols-outlined">casino</span>
+        ¡Sorpréndeme!
       </button>
-      <footer className="border-t border-slate-200 dark:border-white/10 bg-art-paper dark:bg-art-night py-12 px-8">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-slate-500 dark:text-slate-400 text-sm">
-            © 2023 Ismael Gudiño Art Therapy. All rights reserved.
-          </p>
+
+      {/* Artwork Detail Modal */}
+      {selectedWork && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+          onClick={() => setSelectedWork(null)}
+        >
+          <div
+            className="minimal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '800px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              position: 'relative'
+            }}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedWork(null)}
+              className="minimal-button-secondary"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                zIndex: 10,
+                width: '40px',
+                height: '40px',
+                padding: 0,
+                borderRadius: '50%'
+              }}
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+
+            {/* Image */}
+            <div style={{
+              background: 'var(--color-bg-tertiary)',
+              padding: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <img
+                src={selectedWork.colored_svg}
+                alt={selectedWork.title || 'Artwork'}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '500px',
+                  objectFit: 'contain',
+                  borderRadius: 'var(--radius-lg)'
+                }}
+              />
+            </div>
+
+            {/* Details */}
+            <div style={{ padding: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <div>
+                  <h2 className="text-h2" style={{ marginBottom: '8px' }}>
+                    {selectedWork.title || 'Sin título'}
+                  </h2>
+                  <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
+                    {selectedWork.show_author ? 'Por autor' : 'Artista anónimo'}
+                  </p>
+                  <p className="text-small" style={{ color: 'var(--color-text-tertiary)', marginTop: '8px' }}>
+                    {new Date(selectedWork.created_at).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+
+                {/* Like Button */}
+                <button
+                  onClick={() => handleLike(selectedWork.id)}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <HeartIcon
+                    filled={userLikes.has(selectedWork.id)}
+                    size={48}
+                  />
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    color: 'var(--color-accent-primary)'
+                  }}>
+                    {selectedWork.likes_count || 0}
+                  </span>
+                </button>
+              </div>
+
+              {/* Action Button */}
+              {selectedWork.template_id && (
+                <button
+                  onClick={() => {
+                    setSelectedWork(null);
+                    navigate(`/coloring?template=${selectedWork.template_id}`);
+                  }}
+                  className="minimal-button-primary"
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px'
+                  }}
+                >
+                  <span className="material-symbols-outlined">palette</span>
+                  Colorear este diseño
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-      </footer>
+      )}
     </div>
   );
 };

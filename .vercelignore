@@ -1,0 +1,10 @@
+node_modules
+.git
+*.log
+.env
+.env.local
+dist
+COLOR_PICKER_IMPROVEMENTS.md
+QUICKSTART.md
+SUPABASE_INTEGRATION.md
+create_admin_user.sql

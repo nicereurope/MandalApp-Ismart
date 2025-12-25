@@ -1,60 +1,129 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../styles/minimal.css';
 
 interface ArtCardProps {
+  id: string;
   title: string;
   level: string;
   category: string;
   svgContent: string;
+  backgroundColor?: string;
 }
 
-const ArtCard: React.FC<ArtCardProps> = ({ title, level, category, svgContent }) => {
+const ArtCard: React.FC<ArtCardProps> = ({
+  id,
+  title,
+  level,
+  category,
+  svgContent,
+  backgroundColor = '#FAFAFA'
+}) => {
   const navigate = useNavigate();
 
-  let borderColor = "hover:border-vibrant-blue dark:hover:border-vibrant-yellow";
-  let shadowColor = "hover:shadow-vibrant-blue/30 dark:hover:shadow-vibrant-yellow/20";
-  let textColor = "group-hover:text-vibrant-blue dark:group-hover:text-vibrant-yellow";
-  let badgeColor = "bg-vibrant-teal";
-
-  if (level === "INTERMEDIO") {
-    borderColor = "hover:border-vibrant-orange dark:hover:border-vibrant-orange";
-    shadowColor = "hover:shadow-vibrant-orange/30 dark:hover:shadow-vibrant-orange/20";
-    textColor = "group-hover:text-vibrant-orange dark:group-hover:text-vibrant-orange";
-    badgeColor = "bg-vibrant-orange";
-  } else if (level === "AVANZADO") {
-    borderColor = "hover:border-vibrant-pink dark:hover:border-vibrant-pink";
-    shadowColor = "hover:shadow-vibrant-pink/30 dark:hover:shadow-vibrant-pink/20";
-    textColor = "group-hover:text-vibrant-pink dark:group-hover:text-vibrant-pink";
-    badgeColor = "bg-vibrant-pink";
-  }
+  // Minimal badge color based on difficulty
+  const getBadgeColor = () => {
+    switch (level) {
+      case 'PRINCIPIANTE':
+      case 'INICIAL':
+        return '#10B981'; // green
+      case 'INTERMEDIO':
+        return '#F59E0B'; // amber
+      case 'AVANZADO':
+        return '#EF4444'; // red
+      default:
+        return 'var(--color-accent-primary)';
+    }
+  };
 
   return (
     <article
-      onClick={() => navigate('/coloring')}
-      className={`group card-hover relative flex flex-col rounded-4xl bg-white dark:bg-art-surface-dark shadow-sm hover:shadow-glow ${shadowColor} transition-all duration-300 cursor-pointer overflow-hidden border-2 border-slate-100 dark:border-white/5 ${borderColor}`}
+      onClick={() => navigate(`/coloring?template=${id}`)}
+      className="minimal-card"
+      style={{
+        cursor: 'pointer',
+        overflow: 'hidden',
+        padding: 0
+      }}
       tabIndex={0}
       role="button"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          navigate('/coloring');
+          navigate(`/coloring?template=${id}`);
         }
       }}
     >
-      <div className="relative w-full aspect-square p-8 flex items-center justify-center bg-slate-50 dark:bg-black/20">
+      {/* Image Container */}
+      <div
+        style={{
+          width: '100%',
+          aspectRatio: '1/1',
+          padding: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor,
+          position: 'relative'
+        }}
+      >
         <div
-          className="w-full h-full opacity-70 group-hover:opacity-100 transition-opacity"
+          style={{
+            width: '100%',
+            height: '100%',
+            opacity: 0.85,
+            transition: 'opacity 0.3s'
+          }}
           dangerouslySetInnerHTML={{ __html: svgContent }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.85'}
         />
-        <div className={`absolute top-5 right-5 ${badgeColor} text-white text-xs tracking-wider font-bold px-4 py-2 rounded-full shadow-lg transform group-hover:scale-105 transition-transform`}>
-          {level}
+
+        {/* Difficulty Badge */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            backgroundColor: getBadgeColor(),
+            color: 'white',
+            fontSize: '11px',
+            fontWeight: 600,
+            padding: '6px 12px',
+            borderRadius: 'var(--radius-md)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          {level === 'PRINCIPIANTE' ? 'INICIAL' : level}
         </div>
       </div>
-      <div className="p-6 flex flex-col gap-1 relative">
-        <div className={`absolute -top-6 right-8 ${level === 'INICIAL' ? 'bg-vibrant-blue' : level === 'INTERMEDIO' ? 'bg-vibrant-orange' : 'bg-vibrant-pink'} size-12 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300`}>
-          <span className="material-symbols-outlined text-2xl">brush</span>
-        </div>
-        <h3 className={`text-art-ink dark:text-white text-2xl font-bold font-hand ${textColor} transition-colors`}>{title}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">{category}</p>
+
+      {/* Card Info */}
+      <div style={{ padding: '16px' }}>
+        <h3
+          className="text-h3"
+          style={{
+            marginBottom: '4px',
+            fontSize: '18px',
+            fontWeight: 600,
+            color: 'var(--color-text-primary)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {title}
+        </h3>
+        <p
+          className="text-small"
+          style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: '14px'
+          }}
+        >
+          {category}
+        </p>
       </div>
     </article>
   );

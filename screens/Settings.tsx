@@ -1,89 +1,242 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
+import HeartIcon from '../components/HeartIcon';
+import '../styles/minimal.css';
 
 const ScreenSettings: React.FC = () => {
   const navigate = useNavigate();
   const { darkMode, setDarkMode } = useTheme();
 
   return (
-    <div className="bg-s4-background-light dark:bg-s4-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col transition-colors duration-200 selection:bg-s4-primary selection:text-white">
-      <header className="sticky top-0 z-50 w-full border-b-2 border-slate-200 dark:border-slate-800 bg-s4-background-light/95 dark:bg-s4-background-dark/95 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-24">
-            <div className="flex items-center gap-5">
-              <div aria-hidden="true" className="flex items-center justify-center size-14 rounded-[20px_10px_18px_12px] bg-s4-secondary/10 dark:bg-s4-secondary/20 text-s4-secondary dark:text-blue-300 border-2 border-s4-secondary/20 dark:border-s4-secondary/30">
-                <span className="material-symbols-outlined text-[36px]">accessibility_new</span>
-              </div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Accesibilidad</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--color-bg-secondary)',
+      fontFamily: 'var(--font-primary)'
+    }}>
+      {/* Header */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: 'var(--color-bg-primary)',
+        borderBottom: '1px solid var(--color-border-light)',
+      }}>
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto',
+          padding: '20px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Link to="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            textDecoration: 'none',
+            color: 'inherit'
+          }}>
+            <div style={{ width: '40px', height: '40px' }}>
+              <HeartIcon filled={true} size={40} />
             </div>
-            <button onClick={() => navigate(-1)} aria-label="Cerrar ajustes" className="group flex items-center justify-center size-14 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200">
-              <span className="material-symbols-outlined text-[36px] group-hover:scale-110 transition-transform">close</span>
-            </button>
-          </div>
+            <h1 style={{
+              fontSize: '24px',
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              margin: 0
+            }}>
+              Configuración
+            </h1>
+          </Link>
+
+          <button
+            onClick={() => navigate(-1)}
+            className="minimal-button-secondary"
+            aria-label="Cerrar"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+          </button>
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        <div className="space-y-4">
-          <h2 className="text-4xl font-bold text-slate-900 dark:text-white">Personaliza tu experiencia</h2>
-          <p className="text-slate-700 dark:text-slate-300 text-xl leading-relaxed max-w-2xl font-medium">
-            Ajusta la aplicación a tus necesidades visuales y motoras para una sesión de arte terapia sin fricciones.
+      {/* Main Content */}
+      <main style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 24px' }}>
+        {/* Hero */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 className="text-hero" style={{
+            marginBottom: '12px',
+            color: 'var(--color-text-primary)'
+          }}>
+            Personaliza tu <span style={{ color: 'var(--color-accent-primary)' }}>Experiencia</span>
+          </h2>
+          <p className="text-body" style={{
+            color: 'var(--color-text-secondary)',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Ajusta la aplicación a tus preferencias para una mejor experiencia
           </p>
         </div>
 
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-900 dark:text-white">
-            <span className="material-symbols-outlined text-s4-secondary text-[32px]">visibility</span> Visual
-          </h3>
-          <div className="bg-white dark:bg-s4-surface-dark rounded-3xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden shadow-hand-drawn dark:shadow-hand-drawn-dark">
-            <div className="p-8 border-b-2 border-slate-100 dark:border-slate-800">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <span className="font-bold text-xl text-slate-900 dark:text-white">Modo de Color</span>
-                <span className="inline-flex items-center text-base font-bold text-s4-secondary dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-4 py-1.5 rounded-full border border-blue-100 dark:border-blue-800/50">
-                  <span className="material-symbols-outlined text-[20px] mr-2">spa</span> Reduce la fatiga visual
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <label className="cursor-pointer group relative">
-                  <input
-                    className="peer sr-only"
-                    name="theme"
-                    type="radio"
-                    value="light"
-                    checked={!darkMode}
-                    onChange={() => setDarkMode(false)}
-                  />
-                  <div className="absolute -inset-1 rounded-2xl border-4 border-transparent peer-checked:border-s4-primary/50 dark:peer-checked:border-s4-primary/50 transition-colors pointer-events-none"></div>
-                  <div className="flex flex-col items-center justify-center gap-3 h-32 rounded-xl transition-all duration-200 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 peer-checked:bg-white peer-checked:border-s4-primary peer-checked:text-s4-primary-dark peer-checked:shadow-md group-hover:border-slate-300 dark:group-hover:border-slate-600">
-                    <span className="material-symbols-outlined text-[40px]">light_mode</span>
-                    <span className="text-lg font-bold">Claro</span>
-                  </div>
-                </label>
-                <label className="cursor-pointer group relative">
-                  <input
-                    className="peer sr-only"
-                    name="theme"
-                    type="radio"
-                    value="dark"
-                    checked={darkMode}
-                    onChange={() => setDarkMode(true)}
-                  />
-                  <div className="absolute -inset-1 rounded-2xl border-4 border-transparent peer-checked:border-s4-primary/50 dark:peer-checked:border-s4-primary/50 transition-colors pointer-events-none"></div>
-                  <div className="flex flex-col items-center justify-center gap-3 h-32 rounded-xl transition-all duration-200 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 dark:peer-checked:bg-slate-800 peer-checked:border-s4-primary dark:peer-checked:text-s4-primary peer-checked:shadow-md group-hover:border-slate-300 dark:group-hover:border-slate-600">
-                    <span className="material-symbols-outlined text-[40px]">dark_mode</span>
-                    <span className="text-lg font-bold">Oscuro</span>
-                  </div>
-                </label>
-              </div>
+        {/* Theme Section */}
+        <section className="minimal-card" style={{ padding: '32px', marginBottom: '24px' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span className="material-symbols-outlined" style={{
+                fontSize: '28px',
+                color: 'var(--color-accent-primary)'
+              }}>
+                palette
+              </span>
+              <h3 className="text-h2" style={{ margin: 0 }}>
+                Tema de Color
+              </h3>
             </div>
+            <span style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              background: 'var(--color-bg-tertiary)',
+              padding: '6px 12px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)'
+            }}>
+              Reduce la fatiga visual
+            </span>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '16px'
+          }}>
+            {/* Light Mode */}
+            <label style={{ cursor: 'pointer', position: 'relative' }}>
+              <input
+                type="radio"
+                name="theme"
+                value="light"
+                checked={!darkMode}
+                onChange={() => setDarkMode(false)}
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  width: 0,
+                  height: 0
+                }}
+              />
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                height: '140px',
+                borderRadius: 'var(--radius-lg)',
+                border: !darkMode ? '2px solid var(--color-accent-primary)' : '2px solid var(--color-border)',
+                background: !darkMode ? 'var(--color-bg-primary)' : 'var(--color-bg-tertiary)',
+                boxShadow: !darkMode ? 'var(--shadow-md)' : 'none',
+                transition: 'all 0.2s',
+                color: !darkMode ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>
+                  light_mode
+                </span>
+                <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                  Claro
+                </span>
+                {!darkMode && (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '20px',
+                    color: 'var(--color-accent-primary)'
+                  }}>
+                    check_circle
+                  </span>
+                )}
+              </div>
+            </label>
+
+            {/* Dark Mode */}
+            <label style={{ cursor: 'pointer', position: 'relative' }}>
+              <input
+                type="radio"
+                name="theme"
+                value="dark"
+                checked={darkMode}
+                onChange={() => setDarkMode(true)}
+                style={{
+                  position: 'absolute',
+                  opacity: 0,
+                  width: 0,
+                  height: 0
+                }}
+              />
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                height: '140px',
+                borderRadius: 'var(--radius-lg)',
+                border: darkMode ? '2px solid var(--color-accent-primary)' : '2px solid var(--color-border)',
+                background: darkMode ? 'var(--color-bg-primary)' : 'var(--color-bg-tertiary)',
+                boxShadow: darkMode ? 'var(--shadow-md)' : 'none',
+                transition: 'all 0.2s',
+                color: darkMode ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)'
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>
+                  dark_mode
+                </span>
+                <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                  Oscuro
+                </span>
+                {darkMode && (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '20px',
+                    color: 'var(--color-accent-primary)'
+                  }}>
+                    check_circle
+                  </span>
+                )}
+              </div>
+            </label>
           </div>
         </section>
 
-        <div className="pt-8 flex flex-col items-center gap-6 pb-16">
-          <button className="w-full sm:w-auto px-12 h-16 bg-white dark:bg-s4-surface-dark border-2 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:text-s4-primary-dark dark:hover:text-s4-primary hover:border-s4-primary dark:hover:border-s4-primary hover:shadow-lg dark:hover:shadow-lg rounded-2xl font-bold transition-all text-xl shadow-sm focus:ring-4 focus:ring-s4-primary/20 dark:focus:ring-s4-primary/20 rounded-[20px_10px_18px_12px]">
-            Restablecer valores predeterminados
+        {/* Reset Button */}
+        <div style={{ textAlign: 'center', paddingTop: '24px' }}>
+          <button
+            onClick={() => setDarkMode(false)}
+            className="minimal-button-secondary"
+            style={{ minWidth: '250px' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>refresh</span>
+            <span>Restablecer valores</span>
           </button>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          textAlign: 'center',
+          marginTop: '48px',
+          paddingTop: '24px',
+          borderTop: '1px solid var(--color-border)'
+        }}>
+          <p className="text-tiny" style={{
+            color: 'var(--color-text-tertiary)',
+            margin: 0
+          }}>
+            © 2024 Ismael Gudiño. Art Therapy.
+          </p>
         </div>
       </main>
     </div>

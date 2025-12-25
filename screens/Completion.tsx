@@ -1,104 +1,396 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import HeartIcon from '../components/HeartIcon';
+import '../styles/minimal.css';
 
 const ScreenCompletion: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isAfter, setIsAfter] = useState(true);
 
-  return (
-    <div className="bg-g-dark text-g-paper font-hand min-h-screen flex flex-col selection:bg-g-pink selection:text-white overflow-x-hidden relative">
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.03)_0%,transparent_20%),radial-gradient(circle_at_90%_80%,rgba(255,210,63,0.05)_0%,transparent_25%)] opacity-60"></div>
+  const artworkImage = location.state?.artworkImage as string | undefined;
 
-      <header className="w-full bg-g-dark/80 backdrop-blur-md sticky top-0 z-50 border-b border-white/5">
-        <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-white group cursor-pointer">
-            <div className="size-10 bg-g-pink text-white flex items-center justify-center rounded-full organic-border shadow-lg group-hover:rotate-12 transition-transform">
-              <span className="material-symbols-outlined text-2xl">draw</span>
+  const handleDownload = () => {
+    if (!artworkImage) {
+      alert('No hay imagen para descargar');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = artworkImage;
+    link.download = `mandala-art-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = async () => {
+    if (!artworkImage) {
+      alert('No hay imagen para compartir');
+      return;
+    }
+
+    const response = await fetch(artworkImage);
+    const blob = await response.blob();
+    const file = new File([blob], `mandala-art-${Date.now()}.png`, { type: 'image/png' });
+
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: 'Mi Arte Mandala',
+          text: '¡Mira el arte que he creado!',
+          files: [file],
+        });
+      } catch (error) {
+        console.log('Error al compartir:', error);
+      }
+    } else {
+      try {
+        const clipboardItem = new ClipboardItem({ 'image/png': blob });
+        await navigator.clipboard.write([clipboardItem]);
+        alert('¡Imagen copiada al portapapeles!');
+      } catch (error) {
+        alert('Tu navegador no soporta compartir. Usa el botón Descargar.');
+      }
+    }
+  };
+
+  const handlePrint = () => {
+    if (!artworkImage) {
+      alert('No hay imagen para imprimir');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Mandala Art - Imprimir</title>
+            <style>
+              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+              img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+              @media print {
+                body { margin: 0; }
+                img { max-width: 100%; height: auto; page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${artworkImage}" alt="Mandala Art" />
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 250);
+      };
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--color-bg-secondary)',
+      fontFamily: 'var(--font-primary)'
+    }}>
+      {/* Header */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: 'var(--color-bg-primary)',
+        borderBottom: '1px solid var(--color-border-light)',
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '20px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Link to="/" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            textDecoration: 'none',
+            color: 'inherit'
+          }}>
+            <div style={{ width: '40px', height: '40px' }}>
+              <HeartIcon filled={true} size={40} />
             </div>
-            <h2 className="text-white text-2xl font-marker tracking-wide hidden sm:block pt-1">Andrés Gudiño</h2>
+            <h1 style={{
+              fontSize: '24px',
+              fontWeight: 700,
+              color: 'var(--color-text-primary)',
+              margin: 0
+            }}>
+              Ismael Gudiño
+            </h1>
           </Link>
-          <nav className="flex items-center gap-6">
-            <Link to="/" className="text-white/70 hover:text-g-yellow transition-colors font-marker text-lg">Galería</Link>
-            <div className="bg-center bg-no-repeat bg-cover rounded-full size-10 ring-2 ring-white/20 cursor-pointer hover:ring-g-yellow transition-colors" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDzKeBK2QBGs3lE67bs0rTxIlOWwFzLEyGFzaoXWN_HELQqcDzYmxi67sJBj0neLtX-ElrDEaB7woWMjqYnI4JLuTXj1SUJlyI8134WZXzlpbILUMgRzbovE9HnmnKuFwDbdBedsQA35izqXnmXZUkBf1MQYs7FgamjTVvM9TliarRAyo2m9E5XnPesyaBnujkvaIEMloxhgNcRtUhQuKFk_0grULkTfthEXbKvWgveSqIjJEJkaHtf87xy8j8n5IvZu7cD9ZYFMRc')" }}></div>
-          </nav>
+
+          <Link to="/gallery" className="minimal-button-primary">
+            Ver Mis Obras
+          </Link>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-start pt-10 pb-16 px-4 sm:px-6 w-full max-w-6xl mx-auto z-10 relative">
-        <div className="text-center mb-10 max-w-3xl mx-auto space-y-4 animate-fade-in relative">
-          <div className="inline-flex items-center justify-center px-4 py-1.5 mb-2 rounded-full border border-g-yellow/30 bg-g-yellow/10">
-            <span className="text-g-yellow text-sm font-bold uppercase tracking-widest font-sans">Obra Completada</span>
-          </div>
-          <h1 className="text-white text-4xl md:text-6xl font-marker leading-tight tracking-wide drop-shadow-lg">
-            Has creado un momento <br />
-            <span className="text-g-yellow relative inline-block">
-              de paz
-              <svg className="absolute w-full h-3 -bottom-1 left-0 text-g-yellow" preserveAspectRatio="none" viewBox="0 0 100 10">
-                <path d="M0 5 Q 50 10 100 5" fill="none" stroke="currentColor" strokeWidth="3"></path>
-              </svg>
-            </span>
+      {/* Main Content */}
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+        {/* Success Badge */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: '#D1FAE5',
+            color: '#065F46',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '14px',
+            fontWeight: 600,
+            border: '1px solid #6EE7B7'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+            Obra Completada
+          </span>
+        </div>
+
+        {/* Hero Text */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h1 className="text-hero" style={{
+            marginBottom: '16px',
+            color: 'var(--color-text-primary)'
+          }}>
+            Has creado un momento de{' '}
+            <span style={{ color: 'var(--color-accent-primary)' }}>paz</span>
           </h1>
-          <p className="text-white/80 text-xl md:text-2xl font-hand leading-relaxed max-w-lg mx-auto">"Respira profundo, el arte sana lo que el alma calla."</p>
+          <p className="text-h3" style={{
+            color: 'var(--color-text-secondary)',
+            fontStyle: 'italic',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            "Respira profundo, el arte sana lo que el alma calla."
+          </p>
         </div>
 
-        <div className="w-full max-w-4xl mb-12 animate-slide-up relative" style={{ animationDelay: "0.1s" }}>
-          <div className="relative w-full p-3 bg-white shadow-2xl transform rotate-1 transition-transform duration-500 hover:rotate-0 rounded-sm">
-            <div className="relative w-full aspect-video sm:aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-gray-100 border-2 border-gray-100">
-              <div className="absolute inset-0 bg-center bg-cover transform transition-transform duration-1000 ease-out hover:scale-105"
+        {/* Artwork Display */}
+        <div className="minimal-card" style={{
+          padding: '24px',
+          marginBottom: '32px',
+          maxWidth: '800px',
+          margin: '0 auto 32px'
+        }}>
+          <div style={{
+            aspectRatio: '16/9',
+            background: 'var(--color-bg-tertiary)',
+            borderRadius: 'var(--radius-md)',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            {artworkImage ? (
+              <div
                 style={{
-                  backgroundImage: isAfter
-                    ? "url('https://lh3.googleusercontent.com/aida-public/AB6AXuACvdCAtx5ItHbreBrHFX85tnvqYgeM2Bl1a2M_wsg9dYMHPlpaIcGmAa-pkdgs7SgdGj61Bpjq2dPiF4bjTxOz6aC-Iradv4P6HNHlvM7-XzcC4Lvj6Te7PI_TtxSOyPxEjEPcJl8AeaDqSZS4QuEZ0YptoDJuw7vc6Dl7Co-uUJOtmVRZuG_KnolgcUcOsDaDK44OOHohZO9kIMCyyaD6txQqw28NWhLnTyYbRiB5X66cU8DnDZyEIIYwGy5xUQTEJie4hwz7bGY')"
-                    : "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCEXJ4OVDuokNUPzg2Mdmd83ix4HLACOmaDpAf4uFpeXynBanikCp7pLo1P0my-T0Jxrf5_TTZcFUmgVm4S115YtKVxn-Aow6galenp08BmjcM6Y5qnxaDGtWT7dxfNeszlapE40UwePeN8OESBTOXlrWPEq1tO1ay3y2oLE3kOk9zLp0tpBtzW-Z-frAFQU51atyIrCSM5R142hC9rgs6LAc5hB3Mfl8cplLncP-r9q-_OmQUllAyszHZKHZt2gSbTNMYfoOKgbMY')",
-                  filter: isAfter ? 'none' : 'grayscale(100%) contrast(1.2)'
-                }}>
+                  width: '100%',
+                  height: '100%',
+                  backgroundImage: `url('${artworkImage}')`,
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: isAfter ? 'none' : 'grayscale(100%)',
+                  transition: 'filter 0.3s'
+                }}
+              />
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: 'var(--color-text-tertiary)'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '64px', display: 'block', marginBottom: '8px' }}>image</span>
+                  <p>No hay imagen disponible</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
-          <div className="mt-8 flex justify-center animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <label className="inline-flex items-center cursor-pointer gap-4 group select-none relative">
-              <span className="text-white/70 text-lg font-marker group-hover:text-g-yellow transition-colors transform group-hover:-rotate-2">Antes</span>
-              <div className="relative">
-                <input type="checkbox" className="sr-only peer" checked={isAfter} onChange={() => setIsAfter(!isAfter)} />
-                <div className="h-8 w-14 rounded-full bg-white/10 border-2 border-white/20 peer-checked:bg-g-pink/80 peer-checked:border-g-pink transition-all shadow-inner"></div>
-                <div className="absolute top-1.5 left-1.5 bg-white h-5 w-5 rounded-full transition-all peer-checked:translate-x-6 shadow-sm"></div>
-              </div>
-              <span className="text-white/70 text-lg font-marker group-hover:text-g-pink transition-colors transform group-hover:rotate-2">Después</span>
-            </label>
+
+          {/* Before/After Toggle */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '24px',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <span className="text-small" style={{ color: 'var(--color-text-secondary)' }}>
+              Antes
+            </span>
+            <button
+              onClick={() => setIsAfter(!isAfter)}
+              style={{
+                position: 'relative',
+                width: '52px',
+                height: '28px',
+                borderRadius: '14px',
+                background: isAfter ? 'var(--color-accent-primary)' : '#D1D5DB',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+            >
+              <span style={{
+                position: 'absolute',
+                top: '3px',
+                left: isAfter ? '26px' : '3px',
+                width: '22px',
+                height: '22px',
+                borderRadius: '50%',
+                background: 'white',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                transition: 'left 0.2s'
+              }} />
+            </button>
+            <span className="text-small" style={{ color: 'var(--color-text-secondary)' }}>
+              Después
+            </span>
           </div>
         </div>
 
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-slide-up px-4" style={{ animationDelay: "0.3s" }}>
-          <button className="group relative flex flex-col items-center justify-center gap-4 p-8 min-h-[180px] rounded-3xl bg-[#1B2A4E] text-white border-2 border-white/10 hover:border-g-yellow/50 hover:-translate-y-2 transition-all duration-300 shadow-xl overflow-hidden focus:outline-none focus:ring-4 focus:ring-g-blue/50">
-            <div className="p-4 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors z-10 ring-1 ring-white/20">
-              <span className="material-symbols-outlined text-4xl">download</span>
+        {/* Action Buttons */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '24px',
+          maxWidth: '900px',
+          margin: '0 auto 48px'
+        }}>
+          <button
+            onClick={handleDownload}
+            disabled={!artworkImage}
+            className="minimal-card"
+            style={{
+              padding: '32px',
+              cursor: artworkImage ? 'pointer' : 'not-allowed',
+              opacity: artworkImage ? 1 : 0.5,
+              border: '2px solid var(--color-border)',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}
+            onMouseEnter={(e) => artworkImage && (e.currentTarget.style.borderColor = 'var(--color-accent-primary)')}
+            onMouseLeave={(e) => artworkImage && (e.currentTarget.style.borderColor = 'var(--color-border)')}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'var(--color-bg-tertiary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--color-accent-primary)' }}>download</span>
             </div>
-            <div className="text-center z-10">
-              <span className="block text-2xl font-marker mb-1">Descargar</span>
+            <span className="text-h3" style={{ margin: 0 }}>Descargar</span>
+          </button>
+
+          <button
+            onClick={handleShare}
+            disabled={!artworkImage}
+            className="minimal-card"
+            style={{
+              padding: '32px',
+              cursor: artworkImage ? 'pointer' : 'not-allowed',
+              opacity: artworkImage ? 1 : 0.5,
+              border: '2px solid var(--color-accent-primary)',
+              background: 'var(--color-accent-primary)',
+              color: 'white',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}
+            onMouseEnter={(e) => artworkImage && (e.currentTarget.style.transform = 'scale(1.05)')}
+            onMouseLeave={(e) => artworkImage && (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'white' }}>share</span>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <span className="text-h3" style={{ margin: 0, display: 'block' }}>Compartir</span>
+              <span className="text-small" style={{ opacity: 0.9 }}>¡Contagia tu luz!</span>
             </div>
           </button>
-          <button className="group relative flex flex-col items-center justify-center gap-4 p-8 min-h-[200px] md:-mt-4 rounded-[2rem] bg-g-yellow text-g-dark organic-border-2 hover:scale-105 transition-all duration-300 shadow-[0_0_30px_-5px_rgba(255,210,63,0.4)] z-10 focus:outline-none focus:ring-4 focus:ring-g-yellow/50">
-            <div className="p-4 rounded-full bg-black/10 group-hover:bg-black/20 transition-colors z-10">
-              <span className="material-symbols-outlined text-4xl text-g-dark">share</span>
+
+          <button
+            onClick={handlePrint}
+            disabled={!artworkImage}
+            className="minimal-card"
+            style={{
+              padding: '32px',
+              cursor: artworkImage ? 'pointer' : 'not-allowed',
+              opacity: artworkImage ? 1 : 0.5,
+              border: '2px solid var(--color-border)',
+              transition: 'all 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px'
+            }}
+            onMouseEnter={(e) => artworkImage && (e.currentTarget.style.borderColor = 'var(--color-accent-primary)')}
+            onMouseLeave={(e) => artworkImage && (e.currentTarget.style.borderColor = 'var(--color-border)')}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'var(--color-bg-tertiary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--color-accent-primary)' }}>print</span>
             </div>
-            <div className="text-center z-10">
-              <span className="block text-3xl font-marker mb-1">Compartir</span>
-              <span className="block text-lg font-bold font-hand opacity-80">¡Contagia tu luz!</span>
-            </div>
-          </button>
-          <button className="group relative flex flex-col items-center justify-center gap-4 p-8 min-h-[180px] rounded-3xl bg-gradient-to-br from-g-pink to-[#D6336C] text-white border-2 border-transparent hover:border-white/30 hover:-translate-y-2 transition-all duration-300 shadow-xl overflow-hidden focus:outline-none focus:ring-4 focus:ring-g-pink/50">
-            <div className="p-4 rounded-full bg-black/20 group-hover:bg-black/30 transition-colors z-10 ring-1 ring-white/10">
-              <span className="material-symbols-outlined text-4xl">print</span>
-            </div>
-            <div className="text-center z-10">
-              <span className="block text-2xl font-marker mb-1">Hacerlo Real</span>
-            </div>
+            <span className="text-h3" style={{ margin: 0 }}>Imprimir</span>
           </button>
         </div>
 
-        <div className="animate-slide-up relative group" style={{ animationDelay: "0.4s" }}>
-          <Link to="/" className="relative inline-flex items-center gap-3 px-8 py-4 text-xl font-marker text-white hover:text-g-yellow transition-colors focus:outline-none">
-            <span className="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">grid_view</span>
-            <span>Ver más obras de Andrés</span>
+        {/* Back to Gallery */}
+        <div style={{ textAlign: 'center' }}>
+          <Link
+            to="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: 'var(--color-text-secondary)',
+              textDecoration: 'none',
+              fontSize: '16px',
+              fontWeight: 500,
+              transition: 'color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-accent-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+            Ver más obras de Ismael
           </Link>
         </div>
       </main>
