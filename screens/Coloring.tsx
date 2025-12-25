@@ -363,21 +363,38 @@ const ScreenColoring: React.FC = () => {
     });
   };
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Unified handler for both mouse and touch events
+  const handleCanvasInteraction = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (isDrawing) return;
     setIsDrawing(true);
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Get coordinates from either mouse or touch event
+    let clientX: number;
+    let clientY: number;
+
+    if ('touches' in e) {
+      // Touch event
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+      e.preventDefault(); // Prevent scrolling
+    } else {
+      // Mouse event
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
-    const x = Math.floor((e.clientX - rect.left) * scaleX);
-    const y = Math.floor((e.clientY - rect.top) * scaleY);
+    const x = Math.floor((clientX - rect.left) * scaleX);
+    const y = Math.floor((clientY - rect.top) * scaleY);
 
-    // Run flood fill in a timeout to allow UI to update if needed, though usually fast enough
+    // Run flood fill in a timeout to allow UI to update if needed
     setTimeout(() => {
       floodFill(x, y, selectedColor);
       setIsDrawing(false);
@@ -396,21 +413,45 @@ const ScreenColoring: React.FC = () => {
     setHistory(prev => prev.slice(0, -1));
   };
 
-  // Pan handlers
-  const handlePanStart = (e: React.MouseEvent) => {
+  // Pan handlers - unified for mouse and touch
+  const handlePanStart = (e: React.MouseEvent | React.TouchEvent) => {
     if (zoom <= 100) return; // Only pan if zoomed in
     if ((e.target as HTMLElement).tagName === 'CANVAS') return; // Let canvas handle clicks
 
+    let clientX: number;
+    let clientY: number;
+
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
     setIsPanning(true);
-    setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+    setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
   };
 
-  const handlePanMove = (e: React.MouseEvent) => {
+  const handlePanMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isPanning) return;
 
+    let clientX: number;
+    let clientY: number;
+
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
     setPanOffset({
-      x: e.clientX - panStart.x,
-      y: e.clientY - panStart.y
+      x: clientX - panStart.x,
+      y: clientY - panStart.y
     });
   };
 
@@ -515,12 +556,16 @@ const ScreenColoring: React.FC = () => {
             style={{
               width: 'min(90%, 80vh)',
               aspectRatio: '1/1',
-              cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair'
+              cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
+              touchAction: 'none' // Prevent scrolling on touch
             }}
             onMouseDown={handlePanStart}
             onMouseMove={handlePanMove}
             onMouseUp={handlePanEnd}
             onMouseLeave={handlePanEnd}
+            onTouchStart={handlePanStart}
+            onTouchMove={handlePanMove}
+            onTouchEnd={handlePanEnd}
           >
             <div
               className="w-full h-full relative flex items-center justify-center"
@@ -532,9 +577,16 @@ const ScreenColoring: React.FC = () => {
             >
               <canvas
                 ref={canvasRef}
-                onClick={handleCanvasClick}
+                onClick={handleCanvasInteraction}
+                onTouchStart={handleCanvasInteraction}
                 className="max-w-full max-h-full object-contain"
-                style={{ display: 'block', cursor: zoom > 100 ? 'default' : 'crosshair' }}
+                style={{
+                  display: 'block',
+                  cursor: zoom > 100 ? 'default' : 'crosshair',
+                  touchAction: 'none', // Prevent scroll on touch
+                  WebkitTouchCallout: 'none', // Prevent iOS context menu
+                  userSelect: 'none' // Prevent text selection
+                }}
               />
             </div>
           </div>
