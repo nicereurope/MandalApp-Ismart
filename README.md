@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# MandalApp - Ismael Gudiño Art Therapy
 
-# Run and deploy your AI Studio app
+Modern web application for art therapy and mandala coloring.
 
-This contains everything you need to run your app locally.
+## Current Version
+- Deploy: v008dd3a
+- Date: 2025-12-25
+- Status: Production Ready ✅
 
-View your app in AI Studio: https://ai.studio/apps/drive/1C_FMnKqbD6PvZbCCmrHRUpWS_gFrneKy
+## Tech Stack
+- React + TypeScript
+- Vite
+- Supabase
+- Minimal CSS Design System
 
-## Run Locally
+## Quick Start
 
-**Prerequisites:**  Node.js
+### Development
+```bash
+npm install
+npm run dev
+```
 
+### Production Build
+```bash
+npm run build
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Deploy
+Auto-deploys to Vercel on push to `main` branch.
+
+## Features
+- User authentication
+- Template gallery
+- Community artwork sharing
+- Admin panel
+- Responsive design
+- Instagram/Pinterest inspired UI
