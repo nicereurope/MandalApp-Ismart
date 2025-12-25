@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 interface ArtCardProps {
   id: string;
