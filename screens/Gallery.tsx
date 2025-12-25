@@ -364,7 +364,7 @@ const ScreenGallery: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="instagram-grid">
+          <div className="gallery-grid">
             {creations.map((creation) => (
               <div key={creation.id} className="minimal-card" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Image */}
