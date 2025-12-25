@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import HeartIcon from '../components/HeartIcon';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const ScreenAuth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);

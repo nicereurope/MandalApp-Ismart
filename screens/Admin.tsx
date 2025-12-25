@@ -4,7 +4,7 @@ import { supabase, SvgTemplate } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import HeartIcon from '../components/HeartIcon';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const MinimalAdminHeader: React.FC = () => {
   const { user, signOut } = useAuth();

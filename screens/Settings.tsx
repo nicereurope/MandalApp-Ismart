@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import HeartIcon from '../components/HeartIcon';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const ScreenSettings: React.FC = () => {
   const navigate = useNavigate();

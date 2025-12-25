@@ -4,7 +4,7 @@ import ArtCard from '../components/ArtCard';
 import HeartIcon from '../components/HeartIcon';
 import { useAuth } from '../context/AuthContext';
 import { supabase, SvgTemplate } from '../lib/supabase';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();

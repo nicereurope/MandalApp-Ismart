@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import HeartIcon from '../components/HeartIcon';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const ScreenCompletion: React.FC = () => {
   const navigate = useNavigate();

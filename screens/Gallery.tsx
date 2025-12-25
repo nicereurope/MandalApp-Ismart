@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase, UserCreation } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import HeartIcon from '../components/HeartIcon';
-import '../styles/minimal.css';
+import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();
