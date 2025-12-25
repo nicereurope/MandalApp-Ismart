@@ -156,7 +156,7 @@ const MinimalHeader: React.FC = () => {
 };
 
 const ScreenGallery: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [creations, setCreations] = useState<UserCreation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,12 +165,15 @@ const ScreenGallery: React.FC = () => {
   const [selectedCreation, setSelectedCreation] = useState<UserCreation | null>(null);
 
   useEffect(() => {
+    // Wait for auth to finish loading before redirecting
+    if (authLoading) return;
+
     if (!user) {
       navigate('/auth');
       return;
     }
     loadCreations();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const loadCreations = async () => {
     if (!user) return;
