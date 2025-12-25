@@ -497,21 +497,21 @@ const ScreenColoring: React.FC = () => {
     <div className="bg-s2-background-light dark:bg-s2-background-dark font-display text-slate-800 dark:text-slate-200 overflow-hidden h-screen flex flex-col selection:bg-s2-primary/30">
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[9999] opacity-[0.03] bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuBP2pMcVwKvRh7vdOveVbBrM3_LRZ9Pxc9sv26N2x__P-s81MIujZF7CvDjZT_5pjQ86TcOutfk_1gfMzJDHzH6CmW_tAzKenXxXbayxUFCQVKJC9BoNOTE23sO9t6dANNpFFvWFbBWxWncccAI8U6JGEvdQdt5He4pdx5mxYliosPN5oVXenTpamNKFKIiuTi2xUak33uWzI5QPatpzfhqnf7AyifkfTNXrIhOBY11skto5Gr3bowEXEynCFOkgChdqkw3cGBaiU4')]"></div>
 
-      <header className="h-20 shrink-0 flex items-center justify-between px-6 md:px-8 bg-s2-surface-light/80 dark:bg-s2-surface-dark/80 backdrop-blur-md z-30 transition-all border-b border-black/5 dark:border-white/5">
-        <div className="flex items-center gap-6">
-          <button onClick={() => navigate('/')} aria-label="Go Back" className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors focus:ring-2 ring-s2-primary group">
-            <span className="material-symbols-outlined text-3xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      <header className="h-16 md:h-20 shrink-0 flex items-center justify-between px-4 md:px-8 bg-s2-surface-light/80 dark:bg-s2-surface-dark/80 backdrop-blur-md z-30 transition-all border-b border-black/5 dark:border-white/5">
+        <div className="flex items-center gap-3 md:gap-6">
+          <button onClick={() => navigate('/')} aria-label="Go Back" className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors focus:ring-2 ring-s2-primary group">
+            <span className="material-symbols-outlined text-2xl md:text-3xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
           </button>
           <div>
-            <h1 className="text-2xl font-handwritten font-bold leading-tight tracking-wide text-slate-900 dark:text-white transform -rotate-1 origin-left">
+            <h1 className="text-lg md:text-2xl font-handwritten font-bold leading-tight tracking-wide text-slate-900 dark:text-white transform -rotate-1 origin-left line-clamp-1">
               {loading ? 'Cargando...' : template?.title || 'Forest Whisper'}
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5 tracking-wide">
+            <p className="hidden md:block text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5 tracking-wide">
               By Ismael Gudiño
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Auto-save indicator */}
           {autoSaveStatus !== 'idle' && (
             <span className={`hidden md:inline-flex text-sm items-center gap-2 mr-2 select-none font-medium transition-all ${autoSaveStatus === 'saving' ? 'text-amber-500' : 'text-green-600'
@@ -531,7 +531,7 @@ const ScreenColoring: React.FC = () => {
           )}
           <button
             onClick={handleSaveToGallery}
-            className="flex items-center gap-2 justify-center h-11 px-8 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow-lg shadow-green-600/30 hover:shadow-green-600/50 transition-all organic-border transform hover:-rotate-1 active:scale-95"
+            className="hidden md:flex items-center gap-2 justify-center h-11 px-8 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold shadow-lg shadow-green-600/30 hover:shadow-green-600/50 transition-all organic-border transform hover:-rotate-1 active:scale-95"
           >
             <span className="material-symbols-outlined text-xl">collections</span>
             Mis Obras
@@ -541,7 +541,8 @@ const ScreenColoring: React.FC = () => {
 
       <div className="flex flex-1 overflow-hidden relative">
         <main className="flex-1 relative bg-s2-background-light dark:bg-s2-background-dark flex flex-col items-center justify-center overflow-hidden pattern-dot">
-          <div className="absolute top-6 left-6 z-20">
+          {/* Original button - hidden on mobile to save space */}
+          <div className="absolute top-6 left-6 z-20 hidden lg:block">
             <button className="group flex items-center gap-3 p-2 pr-5 rounded-full bg-white/90 dark:bg-s2-surface-dark/90 shadow-organic hover:shadow-organic-hover border border-white/20 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:text-s2-primary transition-all h-14 backdrop-blur-sm">
               <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-s2-primary/10 transition-colors">
                 <span className="material-symbols-outlined text-xl">visibility</span>
@@ -552,9 +553,10 @@ const ScreenColoring: React.FC = () => {
 
           {/* Canvas Container */}
           <div
-            className="relative bg-white shadow-2xl shadow-slate-200/50 dark:shadow-black/50 transition-transform duration-200 ease-out overflow-hidden ring-8 ring-white dark:ring-s2-surface-dark organic-border"
+            className="relative bg-white shadow-2xl shadow-slate-200/50 dark:shadow-black/50 transition-transform duration-200 ease-out overflow-hidden ring-4 lg:ring-8 ring-white dark:ring-s2-surface-dark organic-border"
             style={{
-              width: 'min(90%, 80vh)',
+              width: 'min(95vw, 90vh, 800px)', // Better mobile sizing
+              maxWidth: '100%',
               aspectRatio: '1/1',
               cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
               touchAction: 'none' // Prevent scrolling on touch
