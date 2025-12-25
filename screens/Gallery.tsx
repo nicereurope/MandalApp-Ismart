@@ -254,9 +254,9 @@ const ScreenGallery: React.FC = () => {
     }
   };
 
-  const handleEdit = (templateId: string | null) => {
+  const handleEdit = (templateId: string | null, creationId: string) => {
     if (templateId) {
-      navigate(`/coloring?template=${templateId}`);
+      navigate(`/coloring?template=${templateId}&creation=${creationId}`);
     } else {
       alert('No se puede editar esta obra porque no tiene template asociado.');
     }
@@ -485,7 +485,7 @@ const ScreenGallery: React.FC = () => {
                     {/* Action buttons */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                       <button
-                        onClick={() => handleEdit(creation.template_id)}
+                        onClick={() => handleEdit(creation.template_id, creation.id)}
                         className="minimal-button-secondary"
                         style={{ fontSize: '12px', padding: '8px' }}
                       >

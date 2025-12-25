@@ -18,6 +18,7 @@ const ScreenColoring: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get('template');
+  const creationId = searchParams.get('creation'); // NEW: Get creation ID for editing
   const { user } = useAuth();
 
   const [zoom, setZoom] = useState(100);
@@ -70,49 +71,89 @@ const ScreenColoring: React.FC = () => {
     loadTemplate();
   }, [templateId]);
 
-  // Initialize canvas
+  // Initialize canvas - Load existing creation or blank template
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !template || loading) return;
+    if (!canvas || loading) return;
 
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
-    if (template.svg_content) {
-      const blob = new Blob([template.svg_content], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
+    const size = 1000;
+    canvas.width = size;
+    canvas.height = size;
 
-      const img = new Image();
-      img.onload = () => {
-        const size = 1000;
-        canvas.width = size;
-        canvas.height = size;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, size, size);
 
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, size, size);
-
-        const aspectRatio = img.width / img.height;
-        let drawWidth = size;
-        let drawHeight = size;
-        if (aspectRatio > 1) {
-          drawHeight = size / aspectRatio;
-        } else {
-          drawWidth = size * aspectRatio;
-        }
-
-        const x = (size - drawWidth) / 2;
-        const y = (size - drawHeight) / 2;
-
-        ctx.drawImage(img, x, y, drawWidth, drawHeight);
-        URL.revokeObjectURL(url);
-
-        const initialData = ctx.getImageData(0, 0, size, size);
-        setHistory([initialData]);
-      };
-
-      img.src = url;
+    // If editing an existing creation, load it
+    if (creationId) {
+      loadExistingCreation(canvas, ctx, size);
+    } else if (template?.svg_content) {
+      // Load blank template
+      loadBlankTemplate(canvas, ctx, size);
     }
-  }, [template, loading]);
+  }, [template, loading, creationId]);
+
+  // Load existing colored creation
+  const loadExistingCreation = async (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, size: number) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_creations')
+        .select('colored_svg')
+        .eq('id', creationId)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.colored_svg) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, size, size);
+          const initialData = ctx.getImageData(0, 0, size, size);
+          setHistory([initialData]);
+        };
+        img.src = data.colored_svg;
+      }
+    } catch (error) {
+      console.error('Error loading creation:', error);
+      // Fallback to blank template if loading fails
+      if (template?.svg_content) {
+        loadBlankTemplate(canvas, ctx, size);
+      }
+    }
+  };
+
+  // Load blank SVG template
+  const loadBlankTemplate = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, size: number) => {
+    if (!template?.svg_content) return;
+
+    const blob = new Blob([template.svg_content], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      let drawWidth = size;
+      let drawHeight = size;
+      if (aspectRatio > 1) {
+        drawHeight = size / aspectRatio;
+      } else {
+        drawWidth = size * aspectRatio;
+      }
+
+      const x = (size - drawWidth) / 2;
+      const y = (size - drawHeight) / 2;
+
+      ctx.drawImage(img, x, y, drawWidth, drawHeight);
+      URL.revokeObjectURL(url);
+
+      const initialData = ctx.getImageData(0, 0, size, size);
+      setHistory([initialData]);
+    };
+
+    img.src = url;
+  };
 
   // Flood Fill
   const floodFill = (startX: number, startY: number, fillColorHex: string) => {
