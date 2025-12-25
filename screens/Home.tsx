@@ -675,6 +675,23 @@ const ScreenHome: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Version Footer */}
+      <footer style={{
+        textAlign: 'center',
+        padding: '24px',
+        marginTop: '64px',
+        borderTop: '1px solid var(--color-border)',
+        color: 'var(--color-text-tertiary)',
+        fontSize: '12px'
+      }}>
+        <p style={{ margin: 0 }}>
+          © 2024 Ismael Gudiño. Art Therapy.
+        </p>
+        <p style={{ margin: '8px 0 0 0', fontFamily: 'monospace' }}>
+          Deploy: <strong>v20f59fd</strong> | Build: 2025-12-25 13:55
+        </p>
+      </footer>
     </div>
   );
 };
