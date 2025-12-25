@@ -540,30 +540,6 @@ const ScreenHome: React.FC = () => {
         )}
       </main>
 
-      {/* Surprise Button */}
-      <button
-        onClick={() => {
-          if (templates.length > 0) {
-            const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
-            navigate(`/coloring?template=${randomTemplate.id}`);
-          }
-        }}
-        className="minimal-button-primary"
-        style={{
-          position: 'fixed',
-          bottom: '32px',
-          right: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          boxShadow: 'var(--shadow-lg)',
-          zIndex: 40
-        }}
-      >
-        <span className="material-symbols-outlined">casino</span>
-        ¡Sorpréndeme!
-      </button>
-
       {/* Artwork Detail Modal */}
       {selectedWork && (
         <div
