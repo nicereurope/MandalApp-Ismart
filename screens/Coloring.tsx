@@ -476,7 +476,7 @@ const ScreenColoring: React.FC = () => {
   };
 
   // Download handler
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -485,6 +485,39 @@ const ScreenColoring: React.FC = () => {
       return;
     }
 
+    // If there's shadow content, we need to composite it
+    if (template?.shadow_content) {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      if (tempCtx) {
+        // 1. Draw original colored canvas
+        tempCtx.drawImage(canvas, 0, 0);
+
+        // 2. Load and draw shadow SVG
+        const svgBlob = new Blob([template.shadow_content], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        const img = new Image();
+
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.src = url;
+        });
+
+        tempCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        const dataUrl = tempCanvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `mandalapp-${template?.title || 'obra'}.png`;
+        link.href = dataUrl;
+        link.click();
+        return;
+      }
+    }
+
+    // Default download if no shadow
     const dataUrl = canvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.download = `mandalapp-${template?.title || 'obra'}.png`;
