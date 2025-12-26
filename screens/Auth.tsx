@@ -70,7 +70,18 @@ const ScreenAuth: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <Logo size={140} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <span style={{
+                fontWeight: 800,
+                fontSize: '16px',
+                letterSpacing: '1px',
+                color: 'var(--color-text-primary)',
+                textTransform: 'uppercase'
+              }}>
+                Yo Pinto con
+              </span>
+              <Logo size={150} />
+            </div>
           </Link>
         </div>
 
