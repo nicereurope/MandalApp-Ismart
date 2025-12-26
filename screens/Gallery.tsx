@@ -488,39 +488,60 @@ const ScreenGallery: React.FC = () => {
                     </div>
 
                     {/* Action buttons */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                       <button
                         onClick={() => handleEdit(creation.template_id, creation.id)}
                         className="minimal-button-secondary"
-                        style={{ fontSize: '12px', padding: '8px' }}
+                        style={{
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Editar"
                       >
-                        ✏️ Editar
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
                       </button>
                       <button
                         onClick={() => handleShare(creation.colored_svg, creation.title || 'artwork')}
                         className="minimal-button-secondary"
-                        style={{ fontSize: '12px', padding: '8px' }}
+                        style={{
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Compartir"
                       >
-                        📤 Compartir
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>share</span>
                       </button>
                       <button
                         onClick={() => downloadArtwork(creation.colored_svg, creation.title || 'artwork')}
                         className="minimal-button-secondary"
-                        style={{ fontSize: '12px', padding: '8px' }}
+                        style={{
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Descargar"
                       >
-                        ⬇️ Guardar
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
                       </button>
                       <button
                         onClick={() => deleteCreation(creation.id)}
                         className="minimal-button-secondary"
                         style={{
-                          fontSize: '12px',
-                          padding: '8px',
+                          padding: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           color: '#DC2626',
                           borderColor: '#FCA5A5'
                         }}
+                        title="Eliminar"
                       >
-                        🗑️ Eliminar
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
                       </button>
                     </div>
                   </div>
