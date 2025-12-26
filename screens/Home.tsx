@@ -38,9 +38,16 @@ const MinimalHeader: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           textDecoration: 'none',
-          color: 'inherit'
+          color: 'inherit',
+          gap: '8px'
         }}>
-          <Logo size={120} />
+          <span style={{
+            fontWeight: 800,
+            fontSize: '14px',
+            letterSpacing: '0.5px',
+            color: 'var(--color-text-primary)'
+          }}>YO PINTO con</span>
+          <Logo size={100} />
         </Link>
 
         {/* Desktop Navigation */}
@@ -459,33 +466,23 @@ const ScreenHome: React.FC = () => {
           margin: '0 auto 64px'
         }}>
           <h1 className="text-hero" style={{
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '16px'
-          }}>
-            <span>YO PINTO con </span>
-            <Logo size={180} />
-          </h1>
-          <p style={{
-            fontSize: '20px',
-            fontWeight: 600,
-            color: 'var(--color-accent-primary)',
             marginBottom: '24px',
+            color: 'var(--color-text-primary)',
             textTransform: 'uppercase',
-            letterSpacing: '2px'
+            letterSpacing: '4px',
+            fontSize: 'clamp(32px, 8vw, 64px)',
+            fontWeight: 800
           }}>
-            Arte colaborativo
-          </p>
+            Arte <span style={{ color: 'var(--color-accent-primary)' }}>colaborativo</span>
+          </h1>
           <p className="text-body" style={{
             color: 'var(--color-text-secondary)',
-            fontSize: '18px',
-            lineHeight: '1.6'
+            fontSize: '20px',
+            lineHeight: '1.6',
+            maxWidth: '600px',
+            margin: '0 auto'
           }}>
-            Personaliza y comparte tu arte para relajarte e inspirar
+            Personaliza las obras de tu artista preferido para relajar e inspirar
           </p>
         </div>
 
