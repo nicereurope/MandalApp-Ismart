@@ -45,15 +45,16 @@ const MinimalHeader: React.FC = () => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="mobile-only minimal-button-secondary"
                 style={{
-                  display: 'none',
-                  '@media (max-width: 640px)': {
-                    display: 'flex'
-                  }
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px'
                 }}
-                className="sm:hidden minimal-button-secondary"
               >
-                <span className="material-symbols-outlined">
+                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
                   {mobileMenuOpen ? 'close' : 'menu'}
                 </span>
               </button>
@@ -61,7 +62,7 @@ const MinimalHeader: React.FC = () => {
               {/* Desktop Buttons */}
               <button
                 onClick={() => navigate('/gallery')}
-                className="hidden sm:flex minimal-button-secondary"
+                className="desktop-only minimal-button-secondary"
                 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
@@ -71,7 +72,7 @@ const MinimalHeader: React.FC = () => {
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin')}
-                  className="hidden sm:flex minimal-button-primary"
+                  className="desktop-only minimal-button-primary"
                   style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>admin_panel_settings</span>
@@ -81,7 +82,7 @@ const MinimalHeader: React.FC = () => {
 
               <button
                 onClick={() => signOut()}
-                className="hidden sm:flex minimal-button-secondary"
+                className="desktop-only minimal-button-secondary"
                 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
