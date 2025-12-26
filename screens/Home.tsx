@@ -506,99 +506,109 @@ const ScreenHome: React.FC = () => {
 
         <div style={{
           textAlign: 'center',
-          marginBottom: '48px',
-          padding: '40px 0',
+          marginBottom: '32px',
+          padding: '40px 0 24px',
           borderTop: '1px solid var(--color-border-light)'
         }}>
-          <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
-            🎨 Elige tu propio lienzo
+          <h2 className="text-h2" style={{ marginBottom: '8px', color: 'var(--color-text-primary)' }}>
+            Elige tu propio lienzo
           </h2>
-          <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
-            O si prefieres empezar de cero, elige una de nuestras plantillas
+          <p className="text-body" style={{ color: 'var(--color-text-secondary)', fontSize: '15px' }}>
+            Empieza de cero con una de nuestras plantillas
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div style={{ marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px' }}>
-          <input
-            type="text"
-            placeholder="Buscar diseños..."
-            className="minimal-input"
-            style={{ width: '100%' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        {/* Filters */}
+        {/* Condensed Filter Bar */}
         <div id="tour-filters" style={{
           marginBottom: '48px',
           display: 'flex',
-          gap: '24px',
-          flexWrap: 'wrap',
-          justifyContent: 'center'
+          flexDirection: 'column',
+          gap: '20px',
+          background: 'var(--color-bg-primary)',
+          padding: '24px',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border-light)',
+          boxShadow: 'var(--shadow-sm)'
         }}>
-          <div>
-            <p className="text-small" style={{
-              marginBottom: '12px',
-              fontWeight: 600,
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontSize: '12px'
-            }}>
-              Dificultad
-            </p>
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}>
+            {/* Search */}
+            <div style={{ flex: '1', minWidth: '250px', position: 'relative' }}>
+              <span className="material-symbols-outlined" style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                fontSize: '20px',
+                color: 'var(--color-text-tertiary)'
+              }}>search</span>
+              <input
+                type="text"
+                placeholder="Buscar diseños..."
+                className="minimal-input"
+                style={{ width: '100%', paddingLeft: '40px' }}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* Difficulty Pills */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="text-tiny" style={{ fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Dificultad:</span>
               <button
                 onClick={() => setSelectedDifficulty(selectedDifficulty === 'Principiante' ? null : 'Principiante')}
                 className={selectedDifficulty === 'Principiante' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                style={{ padding: '8px 16px', fontSize: '13px' }}
               >
                 Inicial
               </button>
               <button
                 onClick={() => setSelectedDifficulty(selectedDifficulty === 'Intermedio' ? null : 'Intermedio')}
                 className={selectedDifficulty === 'Intermedio' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                style={{ padding: '8px 16px', fontSize: '13px' }}
               >
                 Intermedio
               </button>
               <button
                 onClick={() => setSelectedDifficulty(selectedDifficulty === 'Avanzado' ? null : 'Avanzado')}
                 className={selectedDifficulty === 'Avanzado' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                style={{ padding: '8px 16px', fontSize: '13px' }}
               >
                 Avanzado
               </button>
             </div>
           </div>
 
-          <div>
-            <p className="text-small" style={{
-              marginBottom: '12px',
-              fontWeight: 600,
-              color: 'var(--color-text-secondary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontSize: '12px'
-            }}>
-              Categorías
-            </p>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            paddingTop: '16px',
+            borderTop: '1px solid var(--color-border-light)'
+          }}>
+            <span className="text-tiny" style={{ fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginRight: '8px' }}>Categorías:</span>
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={selectedCategory === null ? 'minimal-button-primary' : 'minimal-button-secondary'}
+              style={{ padding: '6px 14px', fontSize: '13px' }}
+            >
+              Todas
+            </button>
+            {categories.map(category => (
               <button
-                onClick={() => setSelectedCategory(null)}
-                className={selectedCategory === null ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                key={category}
+                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                className={selectedCategory === category ? 'minimal-button-primary' : 'minimal-button-secondary'}
+                style={{ padding: '6px 14px', fontSize: '13px' }}
               >
-                Todas
+                {category}
               </button>
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                  className={selectedCategory === category ? 'minimal-button-primary' : 'minimal-button-secondary'}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
 
