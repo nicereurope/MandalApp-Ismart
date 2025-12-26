@@ -68,15 +68,7 @@ const ScreenAuth: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <Logo size={48} />
-            <h1 style={{
-              fontSize: '32px',
-              fontWeight: 700,
-              color: 'var(--color-text-primary)',
-              margin: 0
-            }}>
-              Ismael Gudiño
-            </h1>
+            <Logo size={140} />
           </Link>
         </div>
 

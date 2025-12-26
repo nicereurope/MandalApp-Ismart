@@ -30,21 +30,10 @@ const MinimalHeader: React.FC = () => {
         <Link to="/" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
           textDecoration: 'none',
           color: 'inherit'
         }}>
-          <div style={{ width: '40px', height: '40px' }}>
-            <Logo size={40} />
-          </div>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: 'var(--color-text-primary)',
-            margin: 0
-          }}>
-            Ismael Gudiño
-          </h1>
+          <Logo size={120} />
         </Link>
 
         {/* Desktop Navigation */}

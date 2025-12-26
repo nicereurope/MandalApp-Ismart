@@ -29,30 +29,10 @@ const MinimalAdminHeader: React.FC = () => {
         <Link to="/" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
           textDecoration: 'none',
           color: 'inherit'
         }}>
-          <div style={{ width: '40px', height: '40px' }}>
-            <Logo size={40} />
-          </div>
-          <div>
-            <h1 style={{
-              fontSize: '24px',
-              fontWeight: 700,
-              color: 'var(--color-text-primary)',
-              margin: 0
-            }}>
-              Admin Panel
-            </h1>
-            <p style={{
-              fontSize: '12px',
-              color: 'var(--color-text-secondary)',
-              margin: 0
-            }}>
-              Gestión de plantillas
-            </p>
-          </div>
+          <Logo size={120} />
         </Link>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
