@@ -609,6 +609,7 @@ const ScreenAdmin: React.FC = () => {
                   />
                   {formData.shadowContent && (
                     <div
+                      className="svg-shadow-overlay"
                       dangerouslySetInnerHTML={{ __html: formData.shadowContent }}
                       style={{
                         position: 'absolute',

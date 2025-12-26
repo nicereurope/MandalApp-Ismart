@@ -293,6 +293,7 @@
   border-color: var(--color-accent-primary);
   box-shadow: 0 0 0 3px rgba(245, 58, 125, 0.1);
 }
+
 /* Logo Responsive */
 .logo-responsive {
   max-height: 120px;
@@ -313,4 +314,13 @@
   .header-container {
     padding: 12px 16px !important;
   }
+}
+
+/* Layered SVG Support */
+.svg-shadow-overlay svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
 }

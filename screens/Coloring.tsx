@@ -700,6 +700,7 @@ const ScreenColoring: React.FC = () => {
             />
             {showShadows && template?.shadow_content && (
               <div
+                className="svg-shadow-overlay"
                 dangerouslySetInnerHTML={{ __html: template.shadow_content }}
                 style={{
                   position: 'absolute',
