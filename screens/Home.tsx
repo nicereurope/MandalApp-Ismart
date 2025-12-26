@@ -462,18 +462,13 @@ const ScreenHome: React.FC = () => {
             marginBottom: '16px',
             color: 'var(--color-text-primary)',
             display: 'flex',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '16px'
           }}>
-            <img
-              src={darkMode ? '/img/yo_pinto_white.svg' : '/img/yo_pinto_black.svg'}
-              alt="Yo Pinto"
-              style={{
-                height: 'auto',
-                maxHeight: '120px',
-                width: '100%',
-                maxWidth: '600px'
-              }}
-            />
+            <span>YO PINTO con </span>
+            <Logo size={180} />
           </h1>
           <p style={{
             fontSize: '20px',
