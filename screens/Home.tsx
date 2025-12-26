@@ -220,6 +220,7 @@ const MinimalHeader: React.FC = () => {
 
 const ScreenHome: React.FC = () => {
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
   const [templates, setTemplates] = useState<SvgTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [publicWorks, setPublicWorks] = useState<any[]>([]);
@@ -748,7 +749,7 @@ const ScreenHome: React.FC = () => {
           Deploy: <strong>v20f59fd</strong> | Build: 2025-12-25 13:55
         </p>
         <p style={{ margin: '4px 0 0 0', fontFamily: 'monospace', fontSize: '11px' }}>
-          Theme: {document.documentElement.classList.contains('dark') ? 'Dark 🌙' : 'Light ☀️'}
+          Theme: {darkMode ? 'Dark 🌙' : 'Light ☀️'}
         </p>
       </footer>
     </div>
