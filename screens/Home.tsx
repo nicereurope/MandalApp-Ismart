@@ -506,33 +506,39 @@ const ScreenHome: React.FC = () => {
 
         <div style={{
           textAlign: 'center',
-          marginBottom: '24px',
-          padding: '40px 0 16px',
+          padding: '40px 0 0',
           borderTop: '1px solid var(--color-border-light)'
         }}>
-          <h2 className="text-h2" style={{ marginBottom: '4px', color: 'var(--color-text-primary)' }}>
-            Elige tu propio lienzo
-          </h2>
         </div>
 
-        {/* Ultra-Condensed Filter Bar */}
+        {/* Ultra-Condensed Seamless Filter Bar */}
         <div id="tour-filters" style={{
-          marginBottom: '48px',
+          marginBottom: '64px',
           display: 'flex',
-          gap: '12px',
+          gap: '20px',
           alignItems: 'center',
           flexWrap: 'wrap',
           background: 'var(--color-bg-primary)',
-          padding: '12px 16px',
-          borderRadius: 'var(--radius-md)',
+          padding: '8px 20px',
+          borderRadius: 'var(--radius-xl)',
           border: '1px solid var(--color-border-light)',
           boxShadow: 'var(--shadow-sm)'
         }}>
+          {/* Label inside the bar */}
+          <span className="text-small" style={{
+            fontWeight: 700,
+            color: 'var(--color-text-primary)',
+            whiteSpace: 'nowrap',
+            marginRight: '12px'
+          }}>
+            Elige tu lienzo
+          </span>
+
           {/* Search */}
-          <div style={{ flex: '2', minWidth: '200px', position: 'relative' }}>
+          <div style={{ flex: '2', minWidth: '180px', position: 'relative' }}>
             <span className="material-symbols-outlined" style={{
               position: 'absolute',
-              left: '10px',
+              left: '0',
               top: '50%',
               transform: 'translateY(-50%)',
               fontSize: '18px',
@@ -540,42 +546,85 @@ const ScreenHome: React.FC = () => {
             }}>search</span>
             <input
               type="text"
-              placeholder="Buscar diseños..."
+              placeholder="Buscar..."
               className="minimal-input"
-              style={{ width: '100%', paddingLeft: '36px', height: '40px' }}
+              style={{
+                width: '100%',
+                paddingLeft: '28px',
+                height: '40px',
+                border: 'none',
+                background: 'transparent',
+                boxShadow: 'none'
+              }}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           {/* Difficulty Dropdown */}
-          <div style={{ flex: '1', minWidth: '140px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <select
               className="minimal-input"
-              style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+              style={{
+                height: '40px',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'transparent',
+                boxShadow: 'none',
+                paddingRight: '24px',
+                appearance: 'none',
+                fontWeight: 600,
+                fontSize: '14px',
+                color: 'var(--color-text-secondary)'
+              }}
               value={selectedDifficulty || ''}
               onChange={(e) => setSelectedDifficulty(e.target.value as any || null)}
             >
-              <option value="">Dificultad (Todas)</option>
+              <option value="">Dificultad</option>
               <option value="Principiante">Inicial</option>
               <option value="Intermedio">Intermedio</option>
               <option value="Avanzado">Avanzado</option>
             </select>
+            <span className="material-symbols-outlined" style={{
+              position: 'absolute',
+              right: '0',
+              pointerEvents: 'none',
+              fontSize: '18px',
+              color: 'var(--color-text-tertiary)'
+            }}>expand_more</span>
           </div>
 
           {/* Category Dropdown */}
-          <div style={{ flex: '1', minWidth: '140px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <select
               className="minimal-input"
-              style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+              style={{
+                height: '40px',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'transparent',
+                boxShadow: 'none',
+                paddingRight: '24px',
+                appearance: 'none',
+                fontWeight: 600,
+                fontSize: '14px',
+                color: 'var(--color-text-secondary)'
+              }}
               value={selectedCategory || ''}
               onChange={(e) => setSelectedCategory(e.target.value || null)}
             >
-              <option value="">Categorías (Todas)</option>
+              <option value="">Categoría</option>
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
             </select>
+            <span className="material-symbols-outlined" style={{
+              position: 'absolute',
+              right: '0',
+              pointerEvents: 'none',
+              fontSize: '18px',
+              color: 'var(--color-text-tertiary)'
+            }}>expand_more</span>
           </div>
         </div>
 
