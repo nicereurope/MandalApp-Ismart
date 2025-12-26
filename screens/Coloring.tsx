@@ -333,9 +333,9 @@ const ScreenColoring: React.FC = () => {
   // Wheel zoom handler
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -10 : 10;
+    const delta = e.deltaY > 0 ? -20 : 20;
     setZoom(prev => {
-      const newZoom = Math.min(300, Math.max(50, prev + delta));
+      const newZoom = Math.min(800, Math.max(50, prev + delta));
       if (newZoom === 100) setPanOffset({ x: 0, y: 0 });
       return newZoom;
     });
@@ -389,7 +389,7 @@ const ScreenColoring: React.FC = () => {
 
       if (Math.abs(delta) > 5) {
         setZoom(prev => {
-          const newZoom = Math.min(300, Math.max(50, prev + (delta > 0 ? 5 : -5)));
+          const newZoom = Math.min(800, Math.max(50, prev + (delta > 0 ? 10 : -10)));
           if (newZoom === 100) setPanOffset({ x: 0, y: 0 });
           return newZoom;
         });
@@ -414,14 +414,16 @@ const ScreenColoring: React.FC = () => {
 
     if (zoom > 100) {
       // Constrain pan offset to prevent losing the canvas
-      // We allow panning roughly half the canvas size in any direction
-      const maxPan = 500;
-      const newX = clientX - panStart.x;
-      const newY = clientY - panStart.y;
+      // Normalize pan speed: the higher the zoom, the slower the relative pan move
+      const scale = zoom / 100;
+      const dx = (clientX - panStart.x) / scale;
+      const dy = (clientY - panStart.y) / scale;
+
+      const maxPan = 600;
 
       setPanOffset({
-        x: Math.min(maxPan, Math.max(-maxPan, newX)),
-        y: Math.min(maxPan, Math.max(-maxPan, newY))
+        x: Math.min(maxPan, Math.max(-maxPan, dx)),
+        y: Math.min(maxPan, Math.max(-maxPan, dy))
       });
     }
   };
@@ -679,30 +681,32 @@ const ScreenColoring: React.FC = () => {
           </span>
 
           <button
-            onClick={() => setZoom(Math.min(200, zoom + 10))}
+            onClick={() => setZoom(Math.min(800, zoom + 20))}
             className="minimal-button-secondary"
             style={{ width: '40px', height: '40px', padding: '8px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
           </button>
 
-          {zoom !== 100 && (
-            <button
-              onClick={() => setZoom(100)}
-              className="minimal-button-secondary"
-              style={{
-                height: '40px',
-                padding: '8px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '13px'
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>refresh</span>
-              <span className="hidden-mobile">Reset</span>
-            </button>
-          )}
+          <button
+            onClick={() => {
+              setZoom(100);
+              setPanOffset({ x: 0, y: 0 });
+            }}
+            className="minimal-button-secondary"
+            style={{
+              height: '40px',
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '13px',
+              background: 'var(--color-bg-tertiary)'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>center_focus_strong</span>
+            <span className="hidden-mobile">Centrar</span>
+          </button>
         </div>
 
         {/* Color Palette - Expanded */}
