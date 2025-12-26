@@ -239,7 +239,7 @@ const ScreenGallery: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('user_creations')
-        .select('*')
+        .select('*, svg_templates(shadow_content)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -437,7 +437,8 @@ const ScreenGallery: React.FC = () => {
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  position: 'relative'
                 }}
                   onClick={() => setSelectedCreation(creation)}>
                   <img
@@ -453,6 +454,20 @@ const ScreenGallery: React.FC = () => {
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   />
+                  {creation.svg_templates?.shadow_content && (
+                    <div
+                      className="svg-shadow-overlay"
+                      dangerouslySetInnerHTML={{ __html: creation.svg_templates.shadow_content }}
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    />
+                  )}
                 </div>
 
                 {/* Info */}

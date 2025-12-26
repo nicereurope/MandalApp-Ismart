@@ -283,7 +283,7 @@ const ScreenHome: React.FC = () => {
       try {
         const { data, error } = await supabase
           .from('user_creations')
-          .select('*')
+          .select('*, svg_templates(shadow_content)')
           .eq('is_public', true)
           .order('created_at', { ascending: false })
           .limit(9);
@@ -526,7 +526,8 @@ const ScreenHome: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      position: 'relative'
                     }}>
                       <img
                         src={work.colored_svg}
@@ -540,6 +541,20 @@ const ScreenHome: React.FC = () => {
                         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       />
+                      {work.svg_templates?.shadow_content && (
+                        <div
+                          className="svg-shadow-overlay"
+                          dangerouslySetInnerHTML={{ __html: work.svg_templates.shadow_content }}
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            pointerEvents: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                 ))
@@ -709,6 +724,7 @@ const ScreenHome: React.FC = () => {
                   level={template.difficulty.toUpperCase()}
                   category={template.category}
                   svgContent={template.svg_content}
+                  shadowContent={template.shadow_content}
                   backgroundColor={template.background_color}
                   isFavorited={userFavorites.has(template.id)}
                   onFavoriteToggle={() => handleFavoriteToggle(template.id)}
@@ -770,7 +786,8 @@ const ScreenHome: React.FC = () => {
               padding: '48px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              position: 'relative'
             }}>
               <img
                 src={selectedWork.colored_svg}
@@ -782,6 +799,23 @@ const ScreenHome: React.FC = () => {
                   borderRadius: 'var(--radius-lg)'
                 }}
               />
+              {selectedWork.svg_templates?.shadow_content && (
+                <div
+                  className="svg-shadow-overlay"
+                  dangerouslySetInnerHTML={{ __html: selectedWork.svg_templates.shadow_content }}
+                  style={{
+                    position: 'absolute',
+                    top: '48px',
+                    left: '48px',
+                    right: '48px',
+                    bottom: '48px',
+                    pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                />
+              )}
             </div>
 
             {/* Details */}

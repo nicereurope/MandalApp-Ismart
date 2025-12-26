@@ -46,4 +46,7 @@ export type UserCreation = {
     updated_at: string;
     is_public?: boolean;
     show_author?: boolean;
+    svg_templates?: {
+        shadow_content?: string;
+    };
 };

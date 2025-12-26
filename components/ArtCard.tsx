@@ -10,6 +10,7 @@ interface ArtCardProps {
   level: string;
   category: string;
   svgContent: string;
+  shadowContent?: string;
   backgroundColor?: string;
   isFavorited?: boolean;
   onFavoriteToggle?: () => void;
@@ -21,6 +22,7 @@ const ArtCard: React.FC<ArtCardProps> = ({
   level,
   category,
   svgContent,
+  shadowContent,
   backgroundColor = '#FAFAFA',
   isFavorited = false,
   onFavoriteToggle
@@ -95,6 +97,24 @@ const ArtCard: React.FC<ArtCardProps> = ({
             justifyContent: 'center'
           }}
         />
+
+        {shadowContent && (
+          <div
+            className="svg-shadow-overlay"
+            dangerouslySetInnerHTML={{ __html: shadowContent }}
+            style={{
+              position: 'absolute',
+              top: '32px',
+              left: '32px',
+              right: '32px',
+              bottom: '32px',
+              pointerEvents: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          />
+        )}
 
         {/* Favorite Heart */}
         <div
