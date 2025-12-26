@@ -249,16 +249,32 @@
   line-height: 1.3;
 }
 
+
 /* Responsive: Mobile/Desktop Only */
-.mobile-only { display: none !important; }
+.mobile-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: flex !important;
+  align-items: center;
+}
 
 @media (max-width: 768px) {
-  .mobile-only { display: flex !important; }
-  .desktop-only { display: none !important; }
+  .mobile-only {
+    display: flex !important;
+    align-items: center;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
 }
 
 /* Form Inputs */
-.minimal-input, .minimal-input textarea, .minimal-input select {
+.minimal-input,
+.minimal-input textarea,
+.minimal-input select {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;

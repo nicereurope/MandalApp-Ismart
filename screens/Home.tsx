@@ -47,7 +47,6 @@ const MinimalHeader: React.FC = () => {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="mobile-only minimal-button-secondary"
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '40px',
@@ -63,7 +62,7 @@ const MinimalHeader: React.FC = () => {
               <button
                 onClick={() => navigate('/gallery')}
                 className="desktop-only minimal-button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
                 <span>Mis Obras</span>
@@ -73,7 +72,7 @@ const MinimalHeader: React.FC = () => {
                 <button
                   onClick={() => navigate('/admin')}
                   className="desktop-only minimal-button-primary"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  style={{ alignItems: 'center', gap: '8px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>admin_panel_settings</span>
                   <span>Admin</span>
@@ -83,7 +82,7 @@ const MinimalHeader: React.FC = () => {
               <button
                 onClick={() => signOut()}
                 className="desktop-only minimal-button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
                 <span>Salir</span>
