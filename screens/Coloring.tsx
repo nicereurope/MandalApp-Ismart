@@ -37,6 +37,13 @@ const ScreenColoring: React.FC = () => {
   // Mobile picker
   const [showPicker, setShowPicker] = useState(false);
 
+  // Cursor state for brush/grab detection
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [cursorMode, setCursorMode] = useState<'brush' | 'grabbing'>('brush');
+
+  // Custom brush cursor SVG
+  const brushCursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%234ECDC4' stroke='%23000' stroke-width='1' d='M8.5 21C6 21 4 19 4 16.5c0-1.5.5-3 1.5-4L18 1l5 5-11.5 11.5c-1 1-2.5 1.5-4 1.5z'/%3E%3Ccircle cx='8' cy='16' r='2' fill='%23fff' opacity='0.7'/%3E%3C/svg%3E\") 4 20, auto";
+
   // Auto-save function
   const autoSave = async () => {
     const canvas = canvasRef.current;
@@ -321,26 +328,37 @@ const ScreenColoring: React.FC = () => {
 
   // Pan handlers
   const handlePanStart = (e: React.MouseEvent | React.TouchEvent) => {
-    if (zoom <= 100) return;
+    setIsMouseDown(true);
 
-    let clientX: number;
-    let clientY: number;
+    // If zoomed, enable panning and change cursor
+    if (zoom > 100) {
+      let clientX: number;
+      let clientY: number;
 
-    if ('touches' in e) {
-      if (e.touches.length === 0) return;
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
+      if ('touches' in e) {
+        if (e.touches.length === 0) return;
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      setIsPanning(true);
+      setCursorMode('grabbing');
+      setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
     } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
+      // Not zoomed, set cursor to grabbing after a delay
+      setTimeout(() => {
+        if (isMouseDown) {
+          setCursorMode('grabbing');
+        }
+      }, 150); // 150ms delay to differentiate click from drag
     }
-
-    setIsPanning(true);
-    setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
   };
 
   const handlePanMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isPanning) return;
+    if (!isPanning && zoom <= 100) return;
 
     let clientX: number;
     let clientY: number;
@@ -354,14 +372,18 @@ const ScreenColoring: React.FC = () => {
       clientY = e.clientY;
     }
 
-    setPanOffset({
-      x: clientX - panStart.x,
-      y: clientY - panStart.y
-    });
+    if (zoom > 100) {
+      setPanOffset({
+        x: clientX - panStart.x,
+        y: clientY - panStart.y
+      });
+    }
   };
 
   const handlePanEnd = () => {
+    setIsMouseDown(false);
     setIsPanning(false);
+    setCursorMode('brush');
   };
 
   // Save to gallery
@@ -500,7 +522,7 @@ const ScreenColoring: React.FC = () => {
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-md)',
             overflow: 'hidden',
-            cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\'%3E%3Cpath fill=\'%234ECDC4\' d=\'M12 2L12 14M12 14L8 10M12 14L16 10\' stroke=\'black\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E") 12 0, pointer',
+            cursor: cursorMode === 'grabbing' ? 'grabbing' : (zoom > 100 ? 'grab' : brushCursor),
             touchAction: 'none',
             display: 'flex',
             alignItems: 'center',
@@ -532,7 +554,7 @@ const ScreenColoring: React.FC = () => {
                 maxWidth: '100%',
                 maxHeight: '100%',
                 display: 'block',
-                cursor: zoom > 100 ? 'default' : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\'%3E%3Cpath fill=\'%234ECDC4\' d=\'M12 2L12 14M12 14L8 10M12 14L16 10\' stroke=\'black\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E") 12 0, pointer',
+                cursor: 'inherit',
                 touchAction: 'none',
                 WebkitTouchCallout: 'none',
                 userSelect: 'none'
