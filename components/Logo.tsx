@@ -44,10 +44,11 @@ const Logo: React.FC<LogoProps> = ({ size = 120, className = '' }) => {
     return (
         <img
             src={logoPath}
-            alt="Gudiño"
+            alt="Gudiño Art Therapy"
             className={`logo-responsive ${className}`}
             onError={() => setImageError(true)}
             style={{
+                height: `${size * 0.35}px`, // Calculated to match the visual presence of the previous logo
                 width: 'auto',
                 display: 'block'
             }}
