@@ -277,10 +277,50 @@ const ScreenGallery: React.FC = () => {
     }
   };
 
-  const downloadArtwork = (dataUrl: string, title: string) => {
+  const compositeShadow = async (dataUrl: string, shadowContent?: string): Promise<string> => {
+    if (!shadowContent) return dataUrl;
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        // Draw base
+        ctx.drawImage(img, 0, 0);
+
+        // Draw shadow
+        const shadowImg = new Image();
+        const svgBlob = new Blob([shadowContent], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        shadowImg.onload = () => {
+          ctx.drawImage(shadowImg, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        shadowImg.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve(dataUrl);
+        };
+        shadowImg.src = url;
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
+  const downloadArtwork = async (dataUrl: string, title: string, shadowContent?: string) => {
     if (dataUrl.startsWith('data:')) {
+      const finalUrl = await compositeShadow(dataUrl, shadowContent);
       const link = document.createElement('a');
-      link.href = dataUrl;
+      link.href = finalUrl;
       link.download = `${title || 'artwork'}.png`;
       link.click();
     } else {
@@ -294,9 +334,10 @@ const ScreenGallery: React.FC = () => {
     }
   };
 
-  const handleShare = async (dataUrl: string, title: string) => {
+  const handleShare = async (dataUrl: string, title: string, shadowContent?: string) => {
     try {
-      const response = await fetch(dataUrl);
+      const finalUrl = await compositeShadow(dataUrl, shadowContent);
+      const response = await fetch(finalUrl);
       const blob = await response.blob();
       const file = new File([blob], `${title || 'artwork'}.png`, { type: 'image/png' });
 
@@ -308,13 +349,13 @@ const ScreenGallery: React.FC = () => {
         });
       } else {
         alert('Tu navegador no soporta compartir archivos.\n¡La imagen se descargará en su lugar!');
-        downloadArtwork(dataUrl, title);
+        downloadArtwork(finalUrl, title); // Already composited
       }
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Error sharing:', error);
         alert('Error al compartir. La imagen se descargará en su lugar.');
-        downloadArtwork(dataUrl, title);
+        downloadArtwork(dataUrl, title, shadowContent);
       }
     }
   };
@@ -583,7 +624,7 @@ const ScreenGallery: React.FC = () => {
                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
                       </button>
                       <button
-                        onClick={() => handleShare(creation.colored_svg, creation.title || 'artwork')}
+                        onClick={() => handleShare(creation.colored_svg, creation.title || 'artwork', creation.svg_templates?.shadow_content)}
                         className="minimal-button-secondary"
                         style={{
                           padding: '10px',
@@ -596,7 +637,7 @@ const ScreenGallery: React.FC = () => {
                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>share</span>
                       </button>
                       <button
-                        onClick={() => downloadArtwork(creation.colored_svg, creation.title || 'artwork')}
+                        onClick={() => downloadArtwork(creation.colored_svg, creation.title || 'artwork', creation.svg_templates?.shadow_content)}
                         className="minimal-button-secondary"
                         style={{
                           padding: '10px',
