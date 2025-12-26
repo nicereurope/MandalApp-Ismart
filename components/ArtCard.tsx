@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import HeartIcon from './HeartIcon';
+import { useAuth } from '../context/AuthContext';
 import '../src/styles/minimal.css';
 
 interface ArtCardProps {
@@ -9,6 +11,8 @@ interface ArtCardProps {
   category: string;
   svgContent: string;
   backgroundColor?: string;
+  isFavorited?: boolean;
+  onFavoriteToggle?: () => void;
 }
 
 const ArtCard: React.FC<ArtCardProps> = ({
@@ -17,9 +21,12 @@ const ArtCard: React.FC<ArtCardProps> = ({
   level,
   category,
   svgContent,
-  backgroundColor = '#FAFAFA'
+  backgroundColor = '#FAFAFA',
+  isFavorited = false,
+  onFavoriteToggle
 }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Minimal badge color based on difficulty
   const getBadgeColor = () => {
@@ -34,6 +41,17 @@ const ArtCard: React.FC<ArtCardProps> = ({
       default:
         return 'var(--color-accent-primary)';
     }
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      if (confirm('¿Quieres guardar este lienzo en tus favoritos? Regístrate gratis para organizar tu colección artística.')) {
+        navigate(`/auth?redirect=${window.location.pathname}`);
+      }
+      return;
+    }
+    if (onFavoriteToggle) onFavoriteToggle();
   };
 
   return (
@@ -55,10 +73,11 @@ const ArtCard: React.FC<ArtCardProps> = ({
     >
       {/* Image Container */}
       <div
+        className="art-card-preview"
         style={{
           width: '100%',
-          minHeight: '200px',
-          padding: '24px',
+          aspectRatio: '1/1',
+          padding: '32px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -70,13 +89,30 @@ const ArtCard: React.FC<ArtCardProps> = ({
           dangerouslySetInnerHTML={{ __html: svgContent }}
           style={{
             width: '100%',
-            height: 'auto',
-            maxHeight: '400px',
+            height: '100%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}
         />
+
+        {/* Favorite Heart */}
+        <div
+          onClick={handleFavoriteClick}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            zIndex: 10,
+            transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }}
+          className="favorite-heart-container"
+        >
+          <HeartIcon
+            filled={isFavorited}
+            size={36}
+          />
+        </div>
 
         {/* Difficulty Badge */}
         <div

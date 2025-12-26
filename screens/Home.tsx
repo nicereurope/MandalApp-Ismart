@@ -240,6 +240,7 @@ const ScreenHome: React.FC = () => {
   const [publicWorksLoading, setPublicWorksLoading] = useState(true);
   const [selectedWork, setSelectedWork] = useState<any | null>(null);
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+  const [userFavorites, setUserFavorites] = useState<Set<string>>(new Set());
   const [showTour, setShowTour] = useState(false);
   const { user } = useAuth();
 
@@ -315,6 +316,32 @@ const ScreenHome: React.FC = () => {
     loadUserLikes();
   }, [user]);
 
+  // Load user's favorites
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      if (!user) {
+        setUserFavorites(new Set());
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_favorites')
+          .select('template_id')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const favoriteIds = new Set(data?.map(fav => fav.template_id) || []);
+        setUserFavorites(favoriteIds);
+      } catch (error) {
+        console.error('Error loading user favorites:', error);
+      }
+    };
+
+    loadUserFavorites();
+  }, [user]);
+
   // Get unique categories from templates
   const categories = Array.from(new Set(templates.map(t => t.category))).sort();
 
@@ -326,7 +353,10 @@ const ScreenHome: React.FC = () => {
     if (selectedDifficulty && template.difficulty !== selectedDifficulty) {
       return false;
     }
-    if (selectedCategory && template.category !== selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'Favoritos' && template.category !== selectedCategory) {
+      return false;
+    }
+    if (selectedCategory === 'Favoritos' && !userFavorites.has(template.id)) {
       return false;
     }
     return true;
@@ -380,6 +410,35 @@ const ScreenHome: React.FC = () => {
       }
     } catch (error) {
       console.error('Error liking work:', error);
+    }
+  };
+
+  const handleFavoriteToggle = async (templateId: string) => {
+    if (!user) return; // Prompt is handled in ArtCard
+
+    try {
+      const isFavorited = userFavorites.has(templateId);
+      const newFavorites = new Set(userFavorites);
+
+      if (isFavorited) {
+        newFavorites.delete(templateId);
+        setUserFavorites(newFavorites);
+
+        await supabase
+          .from('user_favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('template_id', templateId);
+      } else {
+        newFavorites.add(templateId);
+        setUserFavorites(newFavorites);
+
+        await supabase
+          .from('user_favorites')
+          .insert({ user_id: user.id, template_id: templateId });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     }
   };
 
@@ -614,6 +673,7 @@ const ScreenHome: React.FC = () => {
               onChange={(e) => setSelectedCategory(e.target.value || null)}
             >
               <option value="">Categoría</option>
+              {user && <option value="Favoritos">❤️ Favoritos</option>}
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -658,6 +718,8 @@ const ScreenHome: React.FC = () => {
                   category={template.category}
                   svgContent={template.svg_content}
                   backgroundColor={template.background_color}
+                  isFavorited={userFavorites.has(template.id)}
+                  onFavoriteToggle={() => handleFavoriteToggle(template.id)}
                 />
               </div>
             ))
