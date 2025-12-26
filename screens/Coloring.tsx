@@ -505,7 +505,21 @@ const ScreenColoring: React.FC = () => {
           img.src = url;
         });
 
-        tempCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Calculate same aspect ratio logic as used in loadBlankTemplate
+        const aspectRatio = img.width / img.height;
+        let drawWidth = canvas.width;
+        let drawHeight = canvas.height;
+
+        if (aspectRatio > 1) {
+          drawHeight = canvas.width / aspectRatio;
+        } else {
+          drawWidth = canvas.height * aspectRatio;
+        }
+
+        const x = (canvas.width - drawWidth) / 2;
+        const y = (canvas.height - drawHeight) / 2;
+
+        tempCtx.drawImage(img, x, y, drawWidth, drawHeight);
         URL.revokeObjectURL(url);
 
         const dataUrl = tempCanvas.toDataURL('image/png');

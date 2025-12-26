@@ -301,7 +301,21 @@ const ScreenGallery: React.FC = () => {
         const url = URL.createObjectURL(svgBlob);
 
         shadowImg.onload = () => {
-          ctx.drawImage(shadowImg, 0, 0, canvas.width, canvas.height);
+          // Calculate same aspect ratio logic as used in Coloring.tsx loadBlankTemplate
+          const aspectRatio = shadowImg.width / shadowImg.height;
+          let drawWidth = canvas.width;
+          let drawHeight = canvas.height;
+
+          if (aspectRatio > 1) {
+            drawHeight = canvas.width / aspectRatio;
+          } else {
+            drawWidth = canvas.height * aspectRatio;
+          }
+
+          const x = (canvas.width - drawWidth) / 2;
+          const y = (canvas.height - drawHeight) / 2;
+
+          ctx.drawImage(shadowImg, x, y, drawWidth, drawHeight);
           URL.revokeObjectURL(url);
           resolve(canvas.toDataURL('image/png'));
         };
