@@ -44,25 +44,25 @@ const MinimalHeader: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Mobile Menu Button - Always visible on mobile */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-only minimal-button-secondary"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
+              {mobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+
+          {/* Desktop Buttons - Only for logged users */}
           {user ? (
             <>
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="mobile-only minimal-button-secondary"
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '40px',
-                  height: '40px'
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
-                  {mobileMenuOpen ? 'close' : 'menu'}
-                </span>
-              </button>
-
-              {/* Desktop Buttons */}
               <button
                 onClick={() => navigate('/gallery')}
                 className="desktop-only minimal-button-secondary"
@@ -94,12 +94,11 @@ const MinimalHeader: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Theme toggle for non-logged users */}
+              {/* Desktop buttons for non-logged users */}
               <button
                 onClick={toggleTheme}
-                className="minimal-button-secondary"
+                className="desktop-only minimal-button-secondary"
                 style={{
-                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   width: '40px',
@@ -114,8 +113,8 @@ const MinimalHeader: React.FC = () => {
 
               <button
                 onClick={() => navigate('/auth')}
-                className="minimal-button-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="desktop-only minimal-button-primary"
+                style={{ alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
                 <span>Login</span>
@@ -126,8 +125,9 @@ const MinimalHeader: React.FC = () => {
       </div>
 
 
-      {/* Mobile Menu */}
-      {user && mobileMenuOpen && (
+
+      {/* Mobile Menu - For all users */}
+      {mobileMenuOpen && (
         <div style={{
           position: 'absolute',
           top: '100%',
@@ -144,41 +144,74 @@ const MinimalHeader: React.FC = () => {
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           zIndex: 40
         }}>
-          <button
-            onClick={() => {
-              navigate('/gallery');
-              setMobileMenuOpen(false);
-            }}
-            className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
-          >
-            <span className="material-symbols-outlined">photo_library</span>
-            Mis Obras
-          </button>
-          {isAdmin && (
-            <button
-              onClick={() => {
-                navigate('/admin');
-                setMobileMenuOpen(false);
-              }}
-              className="minimal-button-primary"
-              style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
-            >
-              <span className="material-symbols-outlined">admin_panel_settings</span>
-              Admin
-            </button>
+          {user ? (
+            <>
+              {/* Logged user options */}
+              <button
+                onClick={() => {
+                  navigate('/gallery');
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">photo_library</span>
+                Mis Obras
+              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    navigate('/admin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="minimal-button-primary"
+                  style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+                >
+                  <span className="material-symbols-outlined">admin_panel_settings</span>
+                  Admin
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">logout</span>
+                Cerrar Sesión
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Non-logged user options */}
+              <button
+                onClick={() => {
+                  toggleTheme();
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">
+                  {darkMode ? 'light_mode' : 'dark_mode'}
+                </span>
+                {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/auth');
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-primary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">login</span>
+                Iniciar Sesión
+              </button>
+            </>
           )}
-          <button
-            onClick={() => {
-              signOut();
-              setMobileMenuOpen(false);
-            }}
-            className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626', display: 'flex', alignItems: 'center' }}
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Cerrar Sesión
-          </button>
         </div>
       )}
     </header>
