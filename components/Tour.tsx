@@ -18,6 +18,7 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
     const [currentStep, setCurrentStep] = useState<number>(-1);
     const [isVisible, setIsVisible] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+    const [isTargetMissing, setIsTargetMissing] = useState(false);
 
     useEffect(() => {
         const hasSeenTour = localStorage.getItem(`tour_${tourKey}`);
@@ -25,24 +26,41 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
             setTimeout(() => {
                 setIsVisible(true);
                 setCurrentStep(0);
-            }, forceShow ? 100 : 1500); // Faster trigger if forced
+            }, forceShow ? 100 : 1500);
         }
     }, [tourKey, forceShow]);
 
     useEffect(() => {
         if (isVisible && currentStep >= 0 && currentStep < steps.length) {
-            const target = document.getElementById(steps[currentStep].targetId);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => {
-                    setTargetRect(target.getBoundingClientRect());
-                }, 500);
-            } else {
-                // If target not found, skip to next or center it
-                setTargetRect(null);
-            }
+            const checkTarget = () => {
+                const target = document.getElementById(steps[currentStep].targetId);
+                if (target) {
+                    setIsTargetMissing(false);
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Give scroll some time
+                    setTimeout(() => {
+                        setTargetRect(target.getBoundingClientRect());
+                    }, 500);
+                } else {
+                    setIsTargetMissing(true);
+                    setTargetRect(null);
+                }
+            };
+
+            checkTarget();
+
+            // Re-check periodically if missing (e.g. waiting for data)
+            const interval = setInterval(() => {
+                if (!document.getElementById(steps[currentStep].targetId)) {
+                    setIsTargetMissing(true);
+                } else if (isTargetMissing) {
+                    checkTarget();
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
         }
-    }, [currentStep, isVisible, steps]);
+    }, [currentStep, isVisible, steps, isTargetMissing]);
 
     // Update rect on scroll/resize
     useEffect(() => {
@@ -85,17 +103,17 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
         left: targetRect.left - 8,
         width: targetRect.width + 16,
         height: targetRect.height + 16,
-        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)', // Darker overlay for better focus
         borderRadius: '8px',
         zIndex: 9999,
         pointerEvents: 'none',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
     } : {
         position: 'fixed',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+        boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7)',
         zIndex: 9999,
         pointerEvents: 'none'
     };
@@ -110,16 +128,27 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
             zIndex: 10000
         };
 
-        const margin = 20;
-        const tooltipWidth = 280;
+        const margin = 24;
+        const tooltipWidth = 320;
+        const tooltipHeight = 180; // Estimated
 
-        let top = targetRect.bottom + margin;
+        // Horizontal centering
         let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
 
-        // Adjust if off-screen
-        if (left < 10) left = 10;
-        if (left + tooltipWidth > window.innerWidth - 10) left = window.innerWidth - tooltipWidth - 10;
-        if (top + 150 > window.innerHeight) top = targetRect.top - 180;
+        // Vertical positioning (default to bottom)
+        let top = targetRect.bottom + margin;
+
+        // Constraint checks
+        if (left < 20) left = 20;
+        if (left + tooltipWidth > window.innerWidth - 20) left = window.innerWidth - tooltipWidth - 20;
+
+        // If it goes off the bottom of the screen, show it above the target
+        if (top + tooltipHeight > window.innerHeight - 20) {
+            top = targetRect.top - tooltipHeight - margin;
+        }
+
+        // If it still goes off the top of the screen, just place it at the top
+        if (top < 20) top = 20;
 
         return {
             position: 'fixed',
@@ -127,7 +156,7 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
             left,
             width: tooltipWidth,
             zIndex: 10000,
-            transition: 'all 0.3s ease'
+            transition: 'all 0.4s ease'
         };
     };
 
@@ -135,41 +164,67 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
         <>
             <div style={spotlightStyle} />
             <div
-                className="minimal-card"
+                className="minimal-card animate-fade-in"
                 style={{
                     ...getTooltipStyle(),
-                    padding: '20px',
+                    padding: '24px',
                     background: 'var(--color-bg-primary)',
-                    boxShadow: 'var(--shadow-lg)'
+                    boxShadow: 'var(--shadow-lg)',
+                    border: '1px solid var(--color-border-light)',
+                    borderRadius: '16px'
                 }}
             >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <span style={{
-                        fontSize: '12px',
-                        fontWeight: 700,
+                        fontSize: '11px',
+                        fontWeight: 800,
                         color: 'var(--color-accent-primary)',
-                        textTransform: 'uppercase'
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em'
                     }}>
-                        Paso {currentStep + 1} de {steps.length}
+                        {isTargetMissing ? 'Cargando contenido...' : `Paso ${currentStep + 1} de ${steps.length}`}
                     </span>
                     <button
                         onClick={handleComplete}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)' }}
+                        style={{
+                            background: 'var(--color-bg-tertiary)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: 'var(--color-text-secondary)',
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
                     >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
                     </button>
                 </div>
 
-                <h3 className="text-h3" style={{ marginBottom: '8px', fontSize: '18px' }}>{step.title}</h3>
-                <p className="text-small" style={{ color: 'var(--color-text-secondary)', lineHeight: '1.4', marginBottom: '20px' }}>
-                    {step.content}
+                <h3 className="text-h2" style={{
+                    marginBottom: '12px',
+                    fontSize: '20px',
+                    color: 'var(--color-text-primary)' // Explicit high contrast
+                }}>
+                    {isTargetMissing ? 'Espera un momento...' : step.title}
+                </h3>
+                <p className="text-body" style={{
+                    color: 'var(--color-text-primary)', // Using primary for high readability
+                    lineHeight: '1.6',
+                    marginBottom: '24px',
+                    fontSize: '15px',
+                    opacity: 0.9
+                }}>
+                    {isTargetMissing ? 'Estamos preparando la sección para mostrártela.' : step.content}
                 </p>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                     {currentStep > 0 && (
                         <button
                             className="minimal-button-secondary"
-                            style={{ fontSize: '12px', padding: '6px 12px' }}
+                            style={{ fontSize: '13px', padding: '8px 16px' }}
                             onClick={() => setCurrentStep(currentStep - 1)}
                         >
                             Anterior
@@ -177,10 +232,11 @@ const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) =>
                     )}
                     <button
                         className="minimal-button-primary"
-                        style={{ fontSize: '12px', padding: '6px 20px' }}
+                        style={{ fontSize: '13px', padding: '8px 24px' }}
                         onClick={handleNext}
+                        disabled={isTargetMissing}
                     >
-                        {currentStep === steps.length - 1 ? '¡Entendido!' : 'Siguiente'}
+                        {currentStep === steps.length - 1 ? '¡Listo!' : 'Siguiente'}
                     </button>
                 </div>
             </div>
