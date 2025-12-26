@@ -386,17 +386,27 @@ const ScreenHome: React.FC = () => {
           margin: '0 auto 64px'
         }}>
           <h1 className="text-hero" style={{
-            marginBottom: '24px',
+            marginBottom: '8px',
             color: 'var(--color-text-primary)'
           }}>
-            Galería de <span style={{ color: 'var(--color-accent-primary)' }}>Arte Zen</span>
+            GUDIÑO Y <span style={{ color: 'var(--color-accent-primary)' }}>TÚ</span>
           </h1>
+          <p style={{
+            fontSize: '20px',
+            fontWeight: 600,
+            color: 'var(--color-accent-primary)',
+            marginBottom: '24px',
+            textTransform: 'uppercase',
+            letterSpacing: '2px'
+          }}>
+            Atelier y galeria de arte
+          </p>
           <p className="text-body" style={{
             color: 'var(--color-text-secondary)',
             fontSize: '18px',
             lineHeight: '1.6'
           }}>
-            Encuentra tu centro. El color es el lugar donde nuestro cerebro y el universo se encuentran.
+            Personaliza y comparte tu arte para relajarte e inspirar
           </p>
         </div>
 
