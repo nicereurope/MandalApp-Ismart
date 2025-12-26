@@ -44,6 +44,8 @@ const ScreenColoring: React.FC = () => {
   const [cursorMode, setCursorMode] = useState<'brush' | 'grabbing'>('brush');
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | number | null>(null);
 
   // Custom brush cursor SVG
   const brushCursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%234ECDC4' stroke='%23000' stroke-width='1' d='M8.5 21C6 21 4 19 4 16.5c0-1.5.5-3 1.5-4L18 1l5 5-11.5 11.5c-1 1-2.5 1.5-4 1.5z'/%3E%3Ccircle cx='8' cy='16' r='2' fill='%23fff' opacity='0.7'/%3E%3C/svg%3E\") 4 20, auto";
@@ -456,6 +458,21 @@ const ScreenColoring: React.FC = () => {
     setCursorMode('brush');
   };
 
+  // Exit attempt handler
+  const handleExitAttempt = (target: string | number) => {
+    if (!user && history.length > 1) {
+      setPendingPath(target);
+      setShowExitModal(true);
+    } else {
+      autoSave();
+      if (typeof target === 'number') {
+        navigate(target);
+      } else {
+        navigate(target);
+      }
+    }
+  };
+
   // Save to gallery
   const handleSaveToGallery = async () => {
     const canvas = canvasRef.current;
@@ -532,10 +549,7 @@ const ScreenColoring: React.FC = () => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button
-              onClick={async () => {
-                await autoSave();
-                navigate(-1);
-              }}
+              onClick={() => handleExitAttempt(-1)}
               className="minimal-button-secondary"
               style={{
                 width: '40px',
@@ -560,10 +574,7 @@ const ScreenColoring: React.FC = () => {
 
           <div id="tour-header-actions" style={{ display: 'flex', gap: '8px' }}>
             <button
-              onClick={async () => {
-                await autoSave();
-                navigate('/');
-              }}
+              onClick={() => handleExitAttempt('/')}
               className="minimal-button-secondary"
               style={{
                 display: 'flex',
@@ -909,6 +920,82 @@ const ScreenColoring: React.FC = () => {
           }
         ]}
       />
+
+      {/* Exit Confirmation Modal */}
+      {showExitModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div className="minimal-card animate-fade-in" style={{
+            maxWidth: '400px',
+            width: '100%',
+            padding: '32px',
+            textAlign: 'center'
+          }}>
+            <span className="material-symbols-outlined" style={{
+              fontSize: '48px',
+              color: 'var(--color-accent-primary)',
+              marginBottom: '16px'
+            }}>
+              save_as
+            </span>
+            <h2 className="text-h2" style={{ marginBottom: '12px' }}>¿Pintado a medias?</h2>
+            <p className="text-body" style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+              Para guardar tu mandala permanentemente en tu galería y que no se pierda, te recomendamos registrarte ahora.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                className="minimal-button-primary"
+                onClick={() => {
+                  autoSave();
+                  navigate(`/auth?redirect=/coloring?template=${templateId}`);
+                }}
+                style={{ width: '100%', padding: '14px' }}
+              >
+                Guardar y Registrarme
+              </button>
+              <button
+                className="minimal-button-secondary"
+                onClick={() => {
+                  autoSave();
+                  if (typeof pendingPath === 'number') {
+                    navigate(pendingPath);
+                  } else if (pendingPath) {
+                    navigate(pendingPath);
+                  }
+                }}
+                style={{ width: '100%', padding: '14px' }}
+              >
+                Salir sin registrar
+              </button>
+              <button
+                onClick={() => setShowExitModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-tertiary)',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  marginTop: '8px'
+                }}
+              >
+                Seguir pintando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
