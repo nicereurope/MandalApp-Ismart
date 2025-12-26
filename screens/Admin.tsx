@@ -99,6 +99,7 @@ const ScreenAdmin: React.FC = () => {
     title: '',
     description: '',
     svgContent: '',
+    shadowContent: '',
     difficulty: 'Intermedio' as 'Principiante' | 'Intermedio' | 'Avanzado',
     category: 'Mandala',
     backgroundColor: '#ffffff',
@@ -147,6 +148,15 @@ const ScreenAdmin: React.FC = () => {
         throw new Error('El contenido SVG no es válido o contiene código malicioso');
       }
 
+      let sanitizedShadow = '';
+      if (formData.shadowContent && formData.shadowContent.trim() !== '') {
+        sanitizedShadow = DOMPurify.sanitize(formData.shadowContent, {
+          USE_PROFILES: { svg: true, svgFilters: true },
+          ADD_TAGS: ['use'],
+          ADD_ATTR: ['target', 'xlink:href']
+        });
+      }
+
       if (editingId) {
         const { error } = await supabase
           .from('svg_templates')
@@ -154,6 +164,7 @@ const ScreenAdmin: React.FC = () => {
             title: formData.title,
             description: formData.description,
             svg_content: sanitizedSvg,
+            shadow_content: sanitizedShadow || null,
             difficulty: formData.difficulty,
             category: formData.category,
             background_color: formData.backgroundColor,
@@ -167,6 +178,7 @@ const ScreenAdmin: React.FC = () => {
           title: formData.title,
           description: formData.description,
           svg_content: sanitizedSvg,
+          shadow_content: sanitizedShadow || null,
           difficulty: formData.difficulty,
           category: formData.category,
           background_color: formData.backgroundColor,
@@ -178,7 +190,7 @@ const ScreenAdmin: React.FC = () => {
         setMessage('¡Plantilla subida exitosamente!');
       }
 
-      setFormData({ title: '', description: '', svgContent: '', difficulty: 'Intermedio', category: 'Mandala', backgroundColor: '#ffffff' });
+      setFormData({ title: '', description: '', svgContent: '', shadowContent: '', difficulty: 'Intermedio', category: 'Mandala', backgroundColor: '#ffffff' });
       setEditingId(null);
       await loadTemplates();
     } catch (error: any) {
@@ -224,6 +236,7 @@ const ScreenAdmin: React.FC = () => {
       title: template.title,
       description: template.description || '',
       svgContent: template.svg_content,
+      shadowContent: template.shadow_content || '',
       difficulty: template.difficulty,
       category: template.category,
       backgroundColor: template.background_color || '#ffffff',
@@ -234,7 +247,7 @@ const ScreenAdmin: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
-    setFormData({ title: '', description: '', svgContent: '', difficulty: 'Intermedio', category: 'Mandala', backgroundColor: '#ffffff' });
+    setFormData({ title: '', description: '', svgContent: '', shadowContent: '', difficulty: 'Intermedio', category: 'Mandala', backgroundColor: '#ffffff' });
     setEditingId(null);
     setMessage('');
   };
@@ -256,6 +269,27 @@ const ScreenAdmin: React.FC = () => {
     };
     reader.onerror = () => {
       setMessage('Error al leer el archivo');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleShadowUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.svg')) {
+      setMessage('Error: Solo se permiten archivos .svg para sombras');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setFormData({ ...formData, shadowContent: content });
+      setMessage('');
+    };
+    reader.onerror = () => {
+      setMessage('Error al leer el archivo de sombras');
     };
     reader.readAsText(file);
   };
@@ -497,7 +531,65 @@ const ScreenAdmin: React.FC = () => {
               />
             </div>
 
-            {/* SVG Preview */}
+            {/* File Upload Shadow */}
+            <div style={{ padding: '20px', background: 'rgba(0,0,0,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border-light)' }}>
+              <label className="text-small" style={{
+                display: 'block',
+                fontWeight: 600,
+                marginBottom: '8px',
+                color: 'var(--color-text-primary)'
+              }}>
+                Archivo de Sombras / Capa Superior (Opcional)
+              </label>
+              <input
+                id="shadowFile"
+                type="file"
+                accept=".svg"
+                onChange={handleShadowUpload}
+                disabled={uploading}
+                style={{ display: 'none' }}
+              />
+              <label
+                htmlFor="shadowFile"
+                className="minimal-button-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>layers</span>
+                {formData.shadowContent ? 'Cambiar archivo de sombras' : 'Seleccionar archivo de sombras'}
+              </label>
+
+              <div style={{ marginTop: '16px' }}>
+                <label htmlFor="shadowContent" className="text-small" style={{
+                  display: 'block',
+                  fontWeight: 600,
+                  marginBottom: '8px',
+                  color: 'var(--color-text-primary)'
+                }}>
+                  Contenido SVG de Sombras
+                </label>
+                <textarea
+                  id="shadowContent"
+                  value={formData.shadowContent}
+                  onChange={(e) => setFormData({ ...formData, shadowContent: e.target.value })}
+                  placeholder='<svg>... trazados de sombras ...</svg>'
+                  disabled={uploading}
+                  rows={5}
+                  className="minimal-input"
+                  style={{
+                    resize: 'vertical',
+                    fontFamily: 'monospace',
+                    fontSize: '13px'
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* SVG Preview Combined */}
             {formData.svgContent && (
               <div style={{
                 padding: '24px',
@@ -509,16 +601,45 @@ const ScreenAdmin: React.FC = () => {
                   margin: '0 0 16px 0',
                   color: 'var(--color-text-secondary)'
                 }}>
-                  Vista Previa
+                  Vista Previa {formData.shadowContent ? '(Combinada)' : ''}
                 </h3>
                 <div
-                  dangerouslySetInnerHTML={{ __html: formData.svgContent }}
                   style={{
                     maxWidth: '100%',
                     display: 'flex',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    position: 'relative',
+                    aspectRatio: '1/1',
+                    maxHeight: '400px'
                   }}
-                />
+                >
+                  <div
+                    dangerouslySetInnerHTML={{ __html: formData.svgContent }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  />
+                  {formData.shadowContent && (
+                    <div
+                      dangerouslySetInnerHTML={{ __html: formData.shadowContent }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        pointerEvents: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             )}
 
@@ -626,17 +747,32 @@ const ScreenAdmin: React.FC = () => {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       marginBottom: '12px',
-                      fontSize: '13px'
+                      fontSize: '13px',
+                      flexWrap: 'wrap',
+                      gap: '8px'
                     }}>
-                      <span style={{
-                        padding: '4px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        fontWeight: 600,
-                        background: template.is_active ? '#D1FAE5' : '#FEE2E2',
-                        color: template.is_active ? '#065F46' : '#991B1B'
-                      }}>
-                        {template.is_active ? 'Activa' : 'Inactiva'}
-                      </span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{
+                          padding: '4px 12px',
+                          borderRadius: 'var(--radius-md)',
+                          fontWeight: 600,
+                          background: template.is_active ? '#D1FAE5' : '#FEE2E2',
+                          color: template.is_active ? '#065F46' : '#991B1B'
+                        }}>
+                          {template.is_active ? 'Activa' : 'Inactiva'}
+                        </span>
+                        {template.shadow_content && (
+                          <span style={{
+                            padding: '4px 12px',
+                            borderRadius: 'var(--radius-md)',
+                            fontWeight: 600,
+                            background: '#E0E7FF',
+                            color: '#4338CA'
+                          }}>
+                            Sombras
+                          </span>
+                        )}
+                      </div>
                       <span style={{ color: 'var(--color-text-tertiary)' }}>
                         {new Date(template.created_at).toLocaleDateString()}
                       </span>

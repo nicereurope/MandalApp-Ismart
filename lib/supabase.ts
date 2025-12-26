@@ -26,6 +26,7 @@ export type SvgTemplate = {
     title: string;
     description?: string;
     svg_content: string;
+    shadow_content?: string;
     thumbnail_url?: string;
     difficulty: 'Principiante' | 'Intermedio' | 'Avanzado';
     category: string;

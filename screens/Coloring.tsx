@@ -30,6 +30,7 @@ const ScreenColoring: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [template, setTemplate] = useState<SvgTemplate | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showShadows, setShowShadows] = useState(false);
 
   // Pan/Drag state
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -697,6 +698,23 @@ const ScreenColoring: React.FC = () => {
                 userSelect: 'none'
               }}
             />
+            {showShadows && template?.shadow_content && (
+              <div
+                dangerouslySetInnerHTML={{ __html: template.shadow_content }}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2
+                }}
+              />
+            )}
           </div>
         </div>
 
@@ -792,6 +810,29 @@ const ScreenColoring: React.FC = () => {
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>center_focus_strong</span>
             <span className="hidden-mobile">Centrar</span>
           </button>
+
+          {template?.shadow_content && (
+            <button
+              onClick={() => setShowShadows(!showShadows)}
+              className="minimal-button-secondary"
+              style={{
+                height: '40px',
+                padding: '8px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '13px',
+                background: showShadows ? 'var(--color-accent-primary)' : 'var(--color-bg-tertiary)',
+                color: showShadows ? 'white' : 'var(--color-text-primary)',
+                borderColor: showShadows ? 'transparent' : 'var(--color-border-light)'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                {showShadows ? 'visibility' : 'visibility_off'}
+              </span>
+              <span>Sombras</span>
+            </button>
+          )}
         </div>
 
         {/* Color Palette - Expanded */}
