@@ -73,7 +73,6 @@ const ArtCard: React.FC<ArtCardProps> = ({
         }
       }}
     >
-      {/* Image Container */}
       <div
         className="art-card-preview"
         style={{
@@ -87,34 +86,24 @@ const ArtCard: React.FC<ArtCardProps> = ({
           position: 'relative'
         }}
       >
-        <div
-          dangerouslySetInnerHTML={{ __html: svgContent }}
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        />
-
-        {shadowContent && (
+        <div className="svg-layer-container">
           <div
-            className="svg-shadow-overlay"
-            dangerouslySetInnerHTML={{ __html: shadowContent }}
-            style={{
-              position: 'absolute',
-              top: '32px',
-              left: '32px',
-              right: '32px',
-              bottom: '32px',
-              pointerEvents: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+            style={{ width: '100%', height: '100%' }}
           />
-        )}
+
+          {shadowContent && (
+            <div
+              className="svg-shadow-overlay"
+              dangerouslySetInnerHTML={{ __html: shadowContent }}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none'
+              }}
+            />
+          )}
+        </div>
 
         {/* Favorite Heart */}
         <div
