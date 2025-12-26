@@ -45,6 +45,7 @@ const ScreenColoring: React.FC = () => {
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [pendingPath, setPendingPath] = useState<string | number | null>(null);
 
   // Custom brush cursor SVG
@@ -473,6 +474,23 @@ const ScreenColoring: React.FC = () => {
     }
   };
 
+  // Download handler
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (!user) {
+      setShowDownloadModal(true);
+      return;
+    }
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `mandalapp-${template?.title || 'obra'}.png`;
+    link.href = dataUrl;
+    link.click();
+  };
+
   // Save to gallery
   const handleSaveToGallery = async () => {
     const canvas = canvasRef.current;
@@ -585,6 +603,21 @@ const ScreenColoring: React.FC = () => {
             >
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>home</span>
               <span className="hidden-mobile">Inicio</span>
+            </button>
+            <button
+              onClick={handleDownload}
+              className="minimal-button-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                borderColor: 'var(--color-accent-primary)',
+                color: 'var(--color-accent-primary)'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>download</span>
+              <span className="hidden-mobile">Descargar</span>
             </button>
             <button
               onClick={handleSaveToGallery}
@@ -996,6 +1029,77 @@ const ScreenColoring: React.FC = () => {
                 }}
               >
                 Seguir pintando
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download/LeadGen Modal */}
+      {showDownloadModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '20px'
+        }}>
+          <div className="minimal-card animate-fade-in" style={{
+            maxWidth: '400px',
+            width: '100%',
+            padding: '40px 32px',
+            textAlign: 'center',
+            border: '2px solid var(--color-accent-primary)'
+          }}>
+            <span className="material-symbols-outlined" style={{
+              fontSize: '64px',
+              color: 'var(--color-accent-primary)',
+              marginBottom: '20px'
+            }}>
+              verified
+            </span>
+            <h2 className="text-h2" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
+              ¿Quieres descargar tu obra?
+            </h2>
+            <p className="text-body" style={{
+              color: 'var(--color-text-primary)',
+              marginBottom: '32px',
+              fontSize: '16px',
+              lineHeight: '1.6'
+            }}>
+              Únete a nuestra comunidad artística para descargar esta y todas las mandalas que quieras en alta calidad. ¡Es gratis y solo toma un momento! ;)
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                className="minimal-button-primary"
+                onClick={() => {
+                  autoSave();
+                  navigate(`/auth?redirect=/coloring?template=${templateId}`);
+                }}
+                style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: 700 }}
+              >
+                Crear mi cuenta gratuita
+              </button>
+              <button
+                onClick={() => setShowDownloadModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-tertiary)',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  marginTop: '12px',
+                  textDecoration: 'underline'
+                }}
+              >
+                Volver al editor
               </button>
             </div>
           </div>
