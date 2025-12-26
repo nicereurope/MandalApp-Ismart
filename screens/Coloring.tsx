@@ -423,7 +423,7 @@ const ScreenColoring: React.FC = () => {
       return;
     }
 
-    if (!isPanning && zoom <= 100) return;
+    if (!isPanning) return;
 
     let clientX: number;
     let clientY: number;
