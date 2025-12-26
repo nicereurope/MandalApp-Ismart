@@ -276,7 +276,7 @@ const ScreenHome: React.FC = () => {
           .select('*')
           .eq('is_public', true)
           .order('created_at', { ascending: false })
-          .limit(12);
+          .limit(9);
 
         if (error) throw error;
         setPublicWorks(data || []);
@@ -368,7 +368,7 @@ const ScreenHome: React.FC = () => {
         .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
-        .limit(12);
+        .limit(9);
 
       setPublicWorks(data || []);
 
@@ -422,11 +422,94 @@ const ScreenHome: React.FC = () => {
           </p>
         </div>
 
+        {/* Community Gallery - Featured First */}
+        {publicWorks.length > 0 && (
+          <div style={{ marginBottom: '80px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+              <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
+                ✨ Inspiración de la Comunidad
+              </h2>
+              <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
+                Mira lo que otros han creado y haz clic en cualquiera para usarlo como inspiración
+              </p>
+            </div>
+
+            <div className="instagram-grid">
+              {publicWorksLoading ? (
+                <div style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '48px 0',
+                  color: 'var(--color-text-secondary)'
+                }}>
+                  Cargando obras...
+                </div>
+              ) : (
+                publicWorks.map((work) => (
+                  <div
+                    key={work.id}
+                    className="minimal-card animate-fade-in"
+                    onClick={() => setSelectedWork(work)}
+                    style={{
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      padding: 0
+                    }}
+                  >
+                    <div style={{
+                      aspectRatio: '1/1',
+                      background: 'var(--color-bg-tertiary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden'
+                    }}>
+                      <img
+                        src={work.colored_svg}
+                        alt={work.title || 'Community artwork'}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            {publicWorks.length >= 9 && (
+              <div style={{ textAlign: 'center', marginTop: '32px' }}>
+                <p className="text-small" style={{ color: 'var(--color-text-tertiary)' }}>
+                  Mostrando las creaciones más recientes
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '48px',
+          padding: '40px 0',
+          borderTop: '1px solid var(--color-border-light)'
+        }}>
+          <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
+            🎨 Elige tu propio lienzo
+          </h2>
+          <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
+            O si prefieres empezar de cero, elige una de nuestras plantillas
+          </p>
+        </div>
+
         {/* Search Bar */}
         <div style={{ marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px' }}>
           <input
             type="text"
-            placeholder="Buscar plantillas..."
+            placeholder="Buscar diseños..."
             className="minimal-input"
             style={{ width: '100%' }}
             value={searchTerm}
@@ -541,82 +624,6 @@ const ScreenHome: React.FC = () => {
             ))
           )}
         </div>
-
-        {/* Community Gallery */}
-        {publicWorks.length > 0 && (
-          <div>
-            <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-              <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
-                🎨 Galería Comunitaria
-              </h2>
-              <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
-                Descubre las increíbles obras creadas por nuestra comunidad
-              </p>
-            </div>
-
-            <div className="instagram-grid">
-              {publicWorksLoading ? (
-                <div style={{
-                  gridColumn: '1 / -1',
-                  textAlign: 'center',
-                  padding: '48px 0',
-                  color: 'var(--color-text-secondary)'
-                }}>
-                  Cargando obras...
-                </div>
-              ) : (
-                publicWorks.map((work) => (
-                  <div
-                    key={work.id}
-                    className="minimal-card animate-fade-in"
-                    onClick={() => setSelectedWork(work)}
-                    style={{
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                      padding: 0
-                    }}
-                  >
-                    <div style={{
-                      aspectRatio: '1/1',
-                      background: 'var(--color-bg-tertiary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden'
-                    }}>
-                      <img
-                        src={work.colored_svg}
-                        alt={work.title || 'Community artwork'}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          transition: 'transform 0.3s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                      />
-                    </div>
-                    <div style={{ padding: '16px' }}>
-                      <h3 className="text-h3" style={{
-                        marginBottom: '4px',
-                        fontSize: '16px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {work.title || 'Sin título'}
-                      </h3>
-                      <p className="text-small" style={{ color: 'var(--color-text-secondary)' }}>
-                        {work.show_author ? 'Por autor' : 'Anónimo'}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Artwork Detail Modal */}
