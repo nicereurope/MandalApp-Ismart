@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ArtCard from '../components/ArtCard';
+import Logo from '../components/Logo';
 import HeartIcon from '../components/HeartIcon';
 import { useAuth } from '../context/AuthContext';
 import { supabase, SvgTemplate } from '../lib/supabase';
@@ -36,7 +37,7 @@ const MinimalHeader: React.FC = () => {
           color: 'inherit'
         }}>
           <div style={{ width: '40px', height: '40px' }}>
-            <HeartIcon filled={true} size={40} />
+            <Logo size={40} />
           </div>
           <h1 style={{
             fontSize: '24px',

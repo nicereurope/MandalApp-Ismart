@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import HeartIcon from '../components/HeartIcon';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const ScreenCompletion: React.FC = () => {
@@ -119,7 +119,7 @@ const ScreenCompletion: React.FC = () => {
             color: 'inherit'
           }}>
             <div style={{ width: '40px', height: '40px' }}>
-              <HeartIcon filled={true} size={40} />
+              <Logo size={40} />
             </div>
             <h1 style={{
               fontSize: '24px',

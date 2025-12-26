@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
-import HeartIcon from '../components/HeartIcon';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const ScreenSettings: React.FC = () => {
@@ -38,7 +38,7 @@ const ScreenSettings: React.FC = () => {
             color: 'inherit'
           }}>
             <div style={{ width: '40px', height: '40px' }}>
-              <HeartIcon filled={true} size={40} />
+              <Logo size={40} />
             </div>
             <h1 style={{
               fontSize: '24px',

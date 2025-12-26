@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase, UserCreation } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
-import HeartIcon from '../components/HeartIcon';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
@@ -35,7 +35,7 @@ const MinimalHeader: React.FC = () => {
           color: 'inherit'
         }}>
           <div style={{ width: '40px', height: '40px' }}>
-            <HeartIcon filled={true} size={40} />
+            <Logo size={40} />
           </div>
           <h1 style={{
             fontSize: '24px',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import HeartIcon from '../components/HeartIcon';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const ScreenAuth: React.FC = () => {
@@ -68,7 +68,7 @@ const ScreenAuth: React.FC = () => {
             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
-            <HeartIcon filled={true} size={48} />
+            <Logo size={48} />
             <h1 style={{
               fontSize: '32px',
               fontWeight: 700,

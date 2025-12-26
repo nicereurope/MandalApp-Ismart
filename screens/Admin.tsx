@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase, SvgTemplate } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import HeartIcon from '../components/HeartIcon';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const MinimalAdminHeader: React.FC = () => {
@@ -34,7 +34,7 @@ const MinimalAdminHeader: React.FC = () => {
           color: 'inherit'
         }}>
           <div style={{ width: '40px', height: '40px' }}>
-            <HeartIcon filled={true} size={40} />
+            <Logo size={40} />
           </div>
           <div>
             <h1 style={{
