@@ -4,9 +4,10 @@ interface HeartIconProps {
     filled?: boolean;
     size?: number;
     className?: string;
+    onClick?: () => void;
 }
 
-const HeartIcon: React.FC<HeartIconProps> = ({ filled = false, size = 48, className = '' }) => {
+const HeartIcon: React.FC<HeartIconProps> = ({ filled = false, size = 48, className = '', onClick }) => {
     return (
         <svg
             width={size}
@@ -15,55 +16,95 @@ const HeartIcon: React.FC<HeartIconProps> = ({ filled = false, size = 48, classN
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={className}
+            onClick={onClick}
+            style={{ cursor: onClick ? 'pointer' : 'default' }}
         >
-            {/* Main heart shape */}
-            <path
-                d="M50,85 C50,85 15,60 15,40 C15,28 22,20 30,20 C38,20 45,25 50,32 C55,25 62,20 70,20 C78,20 85,28 85,40 C85,60 50,85 50,85z"
-                fill={filled ? '#E91E63' : 'none'}
-                stroke="#E91E63"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-
-            {/* Mandala decorative elements inside heart */}
-            {filled && (
+            {filled ? (
+                // FILLED HEART - Mandala completo con pétalos y detalles
                 <>
-                    {/* Center circle */}
-                    <circle cx="50" cy="45" r="8" fill="white" opacity="0.9" />
-                    <circle cx="50" cy="45" r="5" fill="none" stroke="#E91E63" strokeWidth="1.5" />
+                    {/* Main heart shape - filled */}
+                    <path
+                        d="M50,85 C50,85 15,60 15,40 C15,28 22,20 30,20 C38,20 45,25 50,32 C55,25 62,20 70,20 C78,20 85,28 85,40 C85,60 50,85 50,85z"
+                        fill="#E91E63"
+                        stroke="#C2185B"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
 
-                    {/* Petals around center */}
-                    <g opacity="0.8">
+                    {/* Center mandala circle */}
+                    <circle cx="50" cy="45" r="10" fill="white" opacity="0.95" />
+                    <circle cx="50" cy="45" r="7" fill="none" stroke="#E91E63" strokeWidth="1.5" />
+                    <circle cx="50" cy="45" r="3" fill="#E91E63" />
+
+                    {/* 8 petals around center */}
+                    <g opacity="0.9">
                         {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
                             <ellipse
                                 key={i}
                                 cx="50"
                                 cy="45"
-                                rx="3"
-                                ry="8"
+                                rx="2.5"
+                                ry="9"
                                 fill="white"
                                 transform={`rotate(${angle} 50 45)`}
                             />
                         ))}
                     </g>
 
-                    {/* Dots pattern */}
-                    <circle cx="50" cy="32" r="1.5" fill="white" opacity="0.9" />
-                    <circle cx="50" cy="58" r="1.5" fill="white" opacity="0.9" />
-                    <circle cx="38" cy="45" r="1.5" fill="white" opacity="0.9" />
-                    <circle cx="62" cy="45" r="1.5" fill="white" opacity="0.9" />
-                </>
-            )}
+                    {/* Decorative dots in cross pattern */}
+                    <circle cx="50" cy="30" r="2" fill="white" opacity="0.95" />
+                    <circle cx="50" cy="60" r="2" fill="white" opacity="0.95" />
+                    <circle cx="35" cy="45" r="2" fill="white" opacity="0.95" />
+                    <circle cx="65" cy="45" r="2" fill="white" opacity="0.95" />
 
-            {/* Outline decorative dots when not filled */}
-            {!filled && (
+                    {/* Accent dots */}
+                    <circle cx="42" cy="37" r="1.5" fill="white" opacity="0.8" />
+                    <circle cx="58" cy="37" r="1.5" fill="white" opacity="0.8" />
+                    <circle cx="42" cy="53" r="1.5" fill="white" opacity="0.8" />
+                    <circle cx="58" cy="53" r="1.5" fill="white" opacity="0.8" />
+                </>
+            ) : (
+                // EMPTY HEART - Contorno con mandala minimalista
                 <>
-                    <circle cx="50" cy="45" r="2" fill="#E91E63" />
-                    <circle cx="43" cy="40" r="1.5" fill="#E91E63" opacity="0.7" />
-                    <circle cx="57" cy="40" r="1.5" fill="#E91E63" opacity="0.7" />
-                    <circle cx="43" cy="50" r="1.5" fill="#E91E63" opacity="0.7" />
-                    <circle cx="57" cy="50" r="1.5" fill="#E91E63" opacity="0.7" />
+                    {/* Main heart shape - outline */}
+                    <path
+                        d="M50,85 C50,85 15,60 15,40 C15,28 22,20 30,20 C38,20 45,25 50,32 C55,25 62,20 70,20 C78,20 85,28 85,40 C85,60 50,85 50,85z"
+                        fill="none"
+                        stroke="#E91E63"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+
+                    {/* Inner decorative circle */}
+                    <circle cx="50" cy="45" r="8" fill="none" stroke="#E91E63" strokeWidth="1.5" opacity="0.6" />
+
+                    {/* Center dot */}
+                    <circle cx="50" cy="45" r="2.5" fill="#E91E63" />
+
+                    {/* 4 small petals - minimal mandala */}
+                    <g opacity="0.5">
+                        {[0, 90, 180, 270].map((angle, i) => (
+                            <ellipse
+                                key={i}
+                                cx="50"
+                                cy="45"
+                                rx="1.5"
+                                ry="6"
+                                fill="none"
+                                stroke="#E91E63"
+                                strokeWidth="1"
+                                transform={`rotate(${angle} 50 45)`}
+                            />
+                        ))}
+                    </g>
+
+                    {/* 4 corner dots */}
+                    <circle cx="43" cy="38" r="1.5" fill="#E91E63" opacity="0.6" />
+                    <circle cx="57" cy="38" r="1.5" fill="#E91E63" opacity="0.6" />
+                    <circle cx="43" cy="52" r="1.5" fill="#E91E63" opacity="0.6" />
+                    <circle cx="57" cy="52" r="1.5" fill="#E91E63" opacity="0.6" />
                 </>
             )}
         </svg>
