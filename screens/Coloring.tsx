@@ -949,9 +949,14 @@ const ScreenColoring: React.FC = () => {
             }}>
               save_as
             </span>
-            <h2 className="text-h2" style={{ marginBottom: '12px' }}>¿Pintado a medias?</h2>
-            <p className="text-body" style={{ color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-              Para guardar tu mandala permanentemente en tu galería y que no se pierda, te recomendamos registrarte ahora.
+            <h2 className="text-h2" style={{ marginBottom: '12px', color: 'var(--color-text-primary)' }}>¿Ya te vas?</h2>
+            <p className="text-body" style={{
+              color: 'var(--color-text-primary)',
+              marginBottom: '24px',
+              fontSize: '16px',
+              lineHeight: '1.5'
+            }}>
+              Podemos guardar el progreso de pintura de tu obra con una cuenta totalmente gratuita. Registrate aqui :)
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
