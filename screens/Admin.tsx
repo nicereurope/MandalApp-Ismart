@@ -97,7 +97,7 @@ const MinimalAdminHeader: React.FC = () => {
 };
 
 const ScreenAdmin: React.FC = () => {
-  const { isAdmin, user } = useAuth();
+  const { isAdmin, user, isLoading } = useAuth();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<SvgTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,12 +155,14 @@ const ScreenAdmin: React.FC = () => {
   };
 
   useEffect(() => {
+    if (isLoading) return; // Wait for auth to load before checking permissions
+
     if (!isAdmin) {
       navigate('/');
       return;
     }
     loadData();
-  }, [isAdmin, navigate]);
+  }, [isAdmin, navigate, isLoading]);
 
   const loadTemplates = async () => {
     const { data } = await supabase.from('svg_templates').select('*').order('created_at', { ascending: false });
@@ -328,6 +330,17 @@ const ScreenAdmin: React.FC = () => {
     };
     reader.readAsText(file);
   };
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '48px', animation: 'spin 2s linear infinite' }}>sync</span>
+          <span className="text-h3">Validando accesos...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return null;
