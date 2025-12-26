@@ -51,9 +51,16 @@ const ScreenColoring: React.FC = () => {
   // Auto-save function
   const autoSave = async () => {
     const canvas = canvasRef.current;
-    if (!canvas || !user || !template || !templateId) return;
+    if (!canvas || !template || !templateId) return;
 
     const dataUrl = canvas.toDataURL('image/png');
+
+    // If not logged in, save to local storage as draft
+    if (!user) {
+      localStorage.setItem(`mandalapp_draft_${templateId}`, dataUrl);
+      console.log('Draft saved to localStorage');
+      return;
+    }
 
     try {
       // If editing existing creation, update it
@@ -74,6 +81,8 @@ const ScreenColoring: React.FC = () => {
             colored_svg: dataUrl,
           });
         console.log('Auto-saved (created)');
+        // Clear local draft if it was synced
+        localStorage.removeItem(`mandalapp_draft_${templateId}`);
       }
     } catch (error) {
       console.error('Auto-save error:', error);
@@ -143,11 +152,23 @@ const ScreenColoring: React.FC = () => {
     // If editing an existing creation, load it
     if (creationId) {
       loadExistingCreation(canvas, ctx, size);
-    } else if (template?.svg_content) {
-      // Load blank template
-      loadBlankTemplate(canvas, ctx, size);
+    } else {
+      // Check for local draft first, even if user is logged in (might have started as guest)
+      const localDraft = localStorage.getItem(`mandalapp_draft_${templateId}`);
+      if (localDraft) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, size, size);
+          const initialData = ctx.getImageData(0, 0, size, size);
+          setHistory([initialData]);
+        };
+        img.src = localDraft;
+      } else if (template?.svg_content) {
+        // Load blank template
+        loadBlankTemplate(canvas, ctx, size);
+      }
     }
-  }, [template, loading, creationId]);
+  }, [template, loading, creationId, templateId]);
 
   // Load existing colored creation
   const loadExistingCreation = async (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, size: number) => {
@@ -438,25 +459,45 @@ const ScreenColoring: React.FC = () => {
   // Save to gallery
   const handleSaveToGallery = async () => {
     const canvas = canvasRef.current;
-    if (!canvas || !user || !template || !templateId) {
-      navigate('/gallery');
+    if (!canvas || !template || !templateId) return;
+
+    // If not logged in, prompt to log in and explain progress is saved
+    if (!user) {
+      const dataUrl = canvas.toDataURL('image/png');
+      localStorage.setItem(`mandalapp_draft_${templateId}`, dataUrl);
+
+      if (confirm('Para guardar tu progreso permanentemente en la galería y compartirlo, necesitas iniciar sesión. \n\n¡No te preocupes! Tu obra actual se ha guardado localmente y aparecerá automáticamente cuando regresas tras iniciar sesión.')) {
+        navigate(`/auth?redirect=/coloring?template=${templateId}`);
+      }
       return;
     }
 
     const dataUrl = canvas.toDataURL('image/png');
 
     try {
-      const { error } = await supabase
-        .from('user_creations')
-        .insert({
-          user_id: user.id,
-          template_id: templateId,
-          title: template.title,
-          colored_svg: dataUrl,
-        });
+      if (creationId) {
+        await supabase
+          .from('user_creations')
+          .update({ colored_svg: dataUrl })
+          .eq('id', creationId);
+      } else {
+        const { error } = await supabase
+          .from('user_creations')
+          .insert({
+            user_id: user.id,
+            template_id: templateId,
+            title: template.title,
+            colored_svg: dataUrl,
+          });
 
-      if (error) {
-        console.error('Error saving to gallery:', error);
+        if (error) {
+          console.error('Error saving to gallery:', error);
+          alert('Hubo un error al guardar. Intentando de nuevo...');
+          return;
+        }
+
+        // Success: Clear local draft
+        localStorage.removeItem(`mandalapp_draft_${templateId}`);
       }
     } catch (error) {
       console.error('Error:', error);

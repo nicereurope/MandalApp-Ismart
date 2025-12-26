@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
@@ -12,6 +12,8 @@ const ScreenAuth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +31,7 @@ const ScreenAuth: React.FC = () => {
         if (!isLogin) {
           setError('¡Registro exitoso! Por favor verifica tu email.');
         } else {
-          navigate('/');
+          navigate(redirectPath || '/');
         }
       }
     } catch (err: any) {
