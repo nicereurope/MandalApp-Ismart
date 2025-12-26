@@ -37,36 +37,48 @@ const ScreenColoring: React.FC = () => {
   // Mobile picker
   const [showPicker, setShowPicker] = useState(false);
 
-  // Auto-save on unmount
-  useEffect(() => {
-    return () => {
-      // Save when component unmounts (user navigates away)
-      const canvas = canvasRef.current;
-      if (canvas && user && template && templateId) {
-        const dataUrl = canvas.toDataURL('image/png');
+  // Auto-save function
+  const autoSave = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !user || !template || !templateId) return;
 
-        // If editing existing creation, update it
-        if (creationId) {
-          supabase
-            .from('user_creations')
-            .update({ colored_svg: dataUrl })
-            .eq('id', creationId)
-            .then(() => console.log('Auto-saved'));
-        } else {
-          // If new creation, insert it
-          supabase
-            .from('user_creations')
-            .insert({
-              user_id: user.id,
-              template_id: templateId,
-              title: template.title,
-              colored_svg: dataUrl,
-            })
-            .then(() => console.log('Auto-saved'));
-        }
+    const dataUrl = canvas.toDataURL('image/png');
+
+    try {
+      // If editing existing creation, update it
+      if (creationId) {
+        await supabase
+          .from('user_creations')
+          .update({ colored_svg: dataUrl })
+          .eq('id', creationId);
+        console.log('Auto-saved (updated)');
+      } else {
+        // If new creation, insert it
+        await supabase
+          .from('user_creations')
+          .insert({
+            user_id: user.id,
+            template_id: templateId,
+            title: template.title,
+            colored_svg: dataUrl,
+          });
+        console.log('Auto-saved (created)');
       }
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    }
+  };
+
+  // Save on browser back/forward
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      autoSave();
     };
-  }, [user, template, templateId, creationId]);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
 
   // Palette colors
   const palette = [
@@ -408,7 +420,10 @@ const ScreenColoring: React.FC = () => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button
-              onClick={() => navigate(-1)}
+              onClick={async () => {
+                await autoSave();
+                navigate(-1);
+              }}
               className="minimal-button-secondary"
               style={{
                 width: '40px',
@@ -433,7 +448,10 @@ const ScreenColoring: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
-              onClick={() => navigate('/')}
+              onClick={async () => {
+                await autoSave();
+                navigate('/');
+              }}
               className="minimal-button-secondary"
               style={{
                 display: 'flex',

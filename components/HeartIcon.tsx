@@ -1,5 +1,7 @@
 import React from 'react';
 
+// v2.0 - Mandala Heart Design - Updated 2025-12-25
+
 interface HeartIconProps {
     filled?: boolean;
     size?: number;
