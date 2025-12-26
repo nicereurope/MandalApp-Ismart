@@ -464,127 +464,111 @@ const ScreenAdmin: React.FC = () => {
               </p>
             </div>
 
-            {/* File Upload */}
-            <div>
-              <label className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Archivo SVG
-              </label>
-              <input
-                id="svgFile"
-                type="file"
-                accept=".svg"
-                onChange={handleFileUpload}
-                disabled={uploading}
-                style={{ display: 'none' }}
-              />
-              <label
-                htmlFor="svgFile"
-                className="minimal-button-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer'
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>upload_file</span>
-                {formData.svgContent ? 'Cambiar archivo SVG' : 'Seleccionar archivo SVG'}
-              </label>
-              <p className="text-tiny" style={{
-                color: 'var(--color-text-tertiary)',
-                marginTop: '8px',
-                fontStyle: 'italic'
-              }}>
-                O pega el código SVG manualmente abajo
-              </p>
+            {/* SECCION CAPA BASE (ARCHIVO A) */}
+            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>image</span>
+                <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa Base (Archivo A) *</h3>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <input
+                  id="svgFile"
+                  type="file"
+                  accept=".svg"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  style={{ display: 'none' }}
+                />
+                <label
+                  htmlFor="svgFile"
+                  className="minimal-button-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '14px'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>upload_file</span>
+                  <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                    {formData.svgContent ? 'CAMBIAR ARCHIVO BASE (.SVG)' : 'SUBIR ARCHIVO BASE (.SVG)'}
+                  </span>
+                </label>
+              </div>
             </div>
 
-            {/* SVG Content */}
-            <div>
-              <label htmlFor="svgContent" className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Contenido SVG *
+            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px', marginTop: '-24px' }}>
+              <label htmlFor="svgContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                Código SVG Base (Para control manual)
               </label>
               <textarea
                 id="svgContent"
                 value={formData.svgContent}
                 onChange={(e) => setFormData({ ...formData, svgContent: e.target.value })}
                 required
-                placeholder='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">...</svg>'
+                placeholder='El código aparecerá aquí al seleccionar el archivo...'
                 disabled={uploading}
-                rows={10}
+                rows={5}
                 className="minimal-input"
-                style={{
-                  resize: 'vertical',
-                  fontFamily: 'monospace',
-                  fontSize: '13px'
-                }}
+                style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
               />
             </div>
 
-            {/* File Upload Shadow */}
-            <div style={{ padding: '20px', background: 'rgba(0,0,0,0.02)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border-light)' }}>
-              <label className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Archivo de Sombras / Capa Superior (Opcional)
-              </label>
-              <input
-                id="shadowFile"
-                type="file"
-                accept=".svg"
-                onChange={handleShadowUpload}
-                disabled={uploading}
-                style={{ display: 'none' }}
-              />
-              <label
-                htmlFor="shadowFile"
-                className="minimal-button-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer'
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>layers</span>
-                {formData.shadowContent ? 'Cambiar archivo de sombras' : 'Seleccionar archivo de sombras'}
-              </label>
+            {/* SECCION CAPA SOMBRAS (ARCHIVO B) */}
+            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>layers</span>
+                <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa de Sombras (Archivo B)</h3>
+              </div>
 
-              <div style={{ marginTop: '16px' }}>
-                <label htmlFor="shadowContent" className="text-small" style={{
-                  display: 'block',
-                  fontWeight: 600,
-                  marginBottom: '8px',
-                  color: 'var(--color-text-primary)'
-                }}>
-                  Contenido SVG de Sombras
+              <div style={{ marginBottom: '20px' }}>
+                <input
+                  id="shadowFile"
+                  type="file"
+                  accept=".svg"
+                  onChange={handleShadowUpload}
+                  disabled={uploading}
+                  style={{ display: 'none' }}
+                />
+                <label
+                  htmlFor="shadowFile"
+                  className="minimal-button-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    cursor: 'pointer',
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '14px',
+                    background: '#1A535C',
+                    borderColor: '#1A535C'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>layers</span>
+                  <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                    {formData.shadowContent ? 'CAMBIAR ARCHIVO DE SOMBRAS (.SVG)' : 'SUBIR ARCHIVO DE SOMBRAS (.SVG)'}
+                  </span>
+                </label>
+              </div>
+
+              <div>
+                <label htmlFor="shadowContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                  Código SVG Sombras (Opcional)
                 </label>
                 <textarea
                   id="shadowContent"
                   value={formData.shadowContent}
                   onChange={(e) => setFormData({ ...formData, shadowContent: e.target.value })}
-                  placeholder='<svg>... trazados de sombras ...</svg>'
+                  placeholder='Los detalles de sombras aparecerán aquí al subir...'
                   disabled={uploading}
                   rows={5}
                   className="minimal-input"
-                  style={{
-                    resize: 'vertical',
-                    fontFamily: 'monospace',
-                    fontSize: '13px'
-                  }}
+                  style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
                 />
               </div>
             </div>
@@ -827,7 +811,7 @@ const ScreenAdmin: React.FC = () => {
           )}
         </section>
       </main>
-    </div>
+    </div >
   );
 };
 
