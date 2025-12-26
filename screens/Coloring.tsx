@@ -37,6 +37,37 @@ const ScreenColoring: React.FC = () => {
   // Mobile picker
   const [showPicker, setShowPicker] = useState(false);
 
+  // Auto-save on unmount
+  useEffect(() => {
+    return () => {
+      // Save when component unmounts (user navigates away)
+      const canvas = canvasRef.current;
+      if (canvas && user && template && templateId) {
+        const dataUrl = canvas.toDataURL('image/png');
+
+        // If editing existing creation, update it
+        if (creationId) {
+          supabase
+            .from('user_creations')
+            .update({ colored_svg: dataUrl })
+            .eq('id', creationId)
+            .then(() => console.log('Auto-saved'));
+        } else {
+          // If new creation, insert it
+          supabase
+            .from('user_creations')
+            .insert({
+              user_id: user.id,
+              template_id: templateId,
+              title: template.title,
+              colored_svg: dataUrl,
+            })
+            .then(() => console.log('Auto-saved'));
+        }
+      }
+    };
+  }, [user, template, templateId, creationId]);
+
   // Palette colors
   const palette = [
     "#13eca4", "#FF6B6B", "#4ECDC4", "#FFE66D",
@@ -377,7 +408,7 @@ const ScreenColoring: React.FC = () => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="minimal-button-secondary"
               style={{
                 width: '40px',
@@ -400,19 +431,34 @@ const ScreenColoring: React.FC = () => {
             </h1>
           </div>
 
-          <button
-            onClick={handleSaveToGallery}
-            className="minimal-button-primary"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 20px'
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>collections</span>
-            <span className="hidden-mobile">Mis Obras</span>
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => navigate('/')}
+              className="minimal-button-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>home</span>
+              <span className="hidden-mobile">Inicio</span>
+            </button>
+            <button
+              onClick={handleSaveToGallery}
+              className="minimal-button-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>collections</span>
+              <span className="hidden-mobile">Mis Obras</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -436,7 +482,7 @@ const ScreenColoring: React.FC = () => {
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-md)',
             overflow: 'hidden',
-            cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
+            cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\'%3E%3Cpath fill=\'%234ECDC4\' d=\'M12 2L12 14M12 14L8 10M12 14L16 10\' stroke=\'black\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E") 12 0, pointer',
             touchAction: 'none',
             display: 'flex',
             alignItems: 'center',
@@ -468,7 +514,7 @@ const ScreenColoring: React.FC = () => {
                 maxWidth: '100%',
                 maxHeight: '100%',
                 display: 'block',
-                cursor: zoom > 100 ? 'default' : 'crosshair',
+                cursor: zoom > 100 ? 'default' : 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewBox=\'0 0 24 24\'%3E%3Cpath fill=\'%234ECDC4\' d=\'M12 2L12 14M12 14L8 10M12 14L16 10\' stroke=\'black\' stroke-width=\'1.5\' stroke-linecap=\'round\'/%3E%3C/svg%3E") 12 0, pointer',
                 touchAction: 'none',
                 WebkitTouchCallout: 'none',
                 userSelect: 'none'
