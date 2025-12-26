@@ -506,109 +506,76 @@ const ScreenHome: React.FC = () => {
 
         <div style={{
           textAlign: 'center',
-          marginBottom: '32px',
-          padding: '40px 0 24px',
+          marginBottom: '24px',
+          padding: '40px 0 16px',
           borderTop: '1px solid var(--color-border-light)'
         }}>
-          <h2 className="text-h2" style={{ marginBottom: '8px', color: 'var(--color-text-primary)' }}>
+          <h2 className="text-h2" style={{ marginBottom: '4px', color: 'var(--color-text-primary)' }}>
             Elige tu propio lienzo
           </h2>
-          <p className="text-body" style={{ color: 'var(--color-text-secondary)', fontSize: '15px' }}>
-            Empieza de cero con una de nuestras plantillas
-          </p>
         </div>
 
-        {/* Condensed Filter Bar */}
+        {/* Ultra-Condensed Filter Bar */}
         <div id="tour-filters" style={{
           marginBottom: '48px',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '20px',
+          gap: '12px',
+          alignItems: 'center',
+          flexWrap: 'wrap',
           background: 'var(--color-bg-primary)',
-          padding: '24px',
-          borderRadius: 'var(--radius-lg)',
+          padding: '12px 16px',
+          borderRadius: 'var(--radius-md)',
           border: '1px solid var(--color-border-light)',
           boxShadow: 'var(--shadow-sm)'
         }}>
-          <div style={{
-            display: 'flex',
-            gap: '16px',
-            alignItems: 'center',
-            flexWrap: 'wrap'
-          }}>
-            {/* Search */}
-            <div style={{ flex: '1', minWidth: '250px', position: 'relative' }}>
-              <span className="material-symbols-outlined" style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: '20px',
-                color: 'var(--color-text-tertiary)'
-              }}>search</span>
-              <input
-                type="text"
-                placeholder="Buscar diseños..."
-                className="minimal-input"
-                style={{ width: '100%', paddingLeft: '40px' }}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            {/* Difficulty Pills */}
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span className="text-tiny" style={{ fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Dificultad:</span>
-              <button
-                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Principiante' ? null : 'Principiante')}
-                className={selectedDifficulty === 'Principiante' ? 'minimal-button-primary' : 'minimal-button-secondary'}
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                Inicial
-              </button>
-              <button
-                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Intermedio' ? null : 'Intermedio')}
-                className={selectedDifficulty === 'Intermedio' ? 'minimal-button-primary' : 'minimal-button-secondary'}
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                Intermedio
-              </button>
-              <button
-                onClick={() => setSelectedDifficulty(selectedDifficulty === 'Avanzado' ? null : 'Avanzado')}
-                className={selectedDifficulty === 'Avanzado' ? 'minimal-button-primary' : 'minimal-button-secondary'}
-                style={{ padding: '8px 16px', fontSize: '13px' }}
-              >
-                Avanzado
-              </button>
-            </div>
+          {/* Search */}
+          <div style={{ flex: '2', minWidth: '200px', position: 'relative' }}>
+            <span className="material-symbols-outlined" style={{
+              position: 'absolute',
+              left: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: '18px',
+              color: 'var(--color-text-tertiary)'
+            }}>search</span>
+            <input
+              type="text"
+              placeholder="Buscar diseños..."
+              className="minimal-input"
+              style={{ width: '100%', paddingLeft: '36px', height: '40px' }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            paddingTop: '16px',
-            borderTop: '1px solid var(--color-border-light)'
-          }}>
-            <span className="text-tiny" style={{ fontWeight: 700, color: 'var(--color-text-secondary)', textTransform: 'uppercase', marginRight: '8px' }}>Categorías:</span>
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={selectedCategory === null ? 'minimal-button-primary' : 'minimal-button-secondary'}
-              style={{ padding: '6px 14px', fontSize: '13px' }}
+          {/* Difficulty Dropdown */}
+          <div style={{ flex: '1', minWidth: '140px' }}>
+            <select
+              className="minimal-input"
+              style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+              value={selectedDifficulty || ''}
+              onChange={(e) => setSelectedDifficulty(e.target.value as any || null)}
             >
-              Todas
-            </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                className={selectedCategory === category ? 'minimal-button-primary' : 'minimal-button-secondary'}
-                style={{ padding: '6px 14px', fontSize: '13px' }}
-              >
-                {category}
-              </button>
-            ))}
+              <option value="">Dificultad (Todas)</option>
+              <option value="Principiante">Inicial</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+          </div>
+
+          {/* Category Dropdown */}
+          <div style={{ flex: '1', minWidth: '140px' }}>
+            <select
+              className="minimal-input"
+              style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+              value={selectedCategory || ''}
+              onChange={(e) => setSelectedCategory(e.target.value || null)}
+            >
+              <option value="">Categorías (Todas)</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
           </div>
         </div>
 
