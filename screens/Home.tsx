@@ -21,6 +21,7 @@ const MinimalHeader: React.FC = () => {
       borderBottom: '1px solid var(--color-border-light)',
     }}>
       <div style={{
+        position: 'relative',
         maxWidth: '1200px',
         margin: '0 auto',
         padding: '20px 24px',
@@ -101,15 +102,24 @@ const MinimalHeader: React.FC = () => {
         </nav>
       </div>
 
+
       {/* Mobile Menu */}
       {user && mobileMenuOpen && (
-        <div className="sm:hidden" style={{
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          width: '100%',
+          maxWidth: '100vw',
           borderTop: '1px solid var(--color-border)',
           padding: '16px',
           background: 'var(--color-bg-primary)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '8px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          zIndex: 40
         }}>
           <button
             onClick={() => {
@@ -117,7 +127,7 @@ const MinimalHeader: React.FC = () => {
               setMobileMenuOpen(false);
             }}
             className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
           >
             <span className="material-symbols-outlined">photo_library</span>
             Mis Obras
@@ -129,7 +139,7 @@ const MinimalHeader: React.FC = () => {
                 setMobileMenuOpen(false);
               }}
               className="minimal-button-primary"
-              style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+              style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
             >
               <span className="material-symbols-outlined">admin_panel_settings</span>
               Admin
@@ -141,7 +151,7 @@ const MinimalHeader: React.FC = () => {
               setMobileMenuOpen(false);
             }}
             className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626' }}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626', display: 'flex', alignItems: 'center' }}
           >
             <span className="material-symbols-outlined">logout</span>
             Cerrar Sesión
