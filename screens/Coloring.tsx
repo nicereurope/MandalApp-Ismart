@@ -655,30 +655,108 @@ const ScreenColoring: React.FC = () => {
           )}
         </div>
 
-        {/* Color Palette - Inline */}
+        {/* Color Palette - Expanded */}
         <div style={{
           marginTop: '16px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(10, 1fr)',
-          gap: '8px',
-          maxWidth: '600px'
+          maxWidth: '700px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
         }}>
-          {palette.map((color) => (
-            <button
-              key={color}
-              onClick={() => setSelectedColor(color)}
+          {/* Preset colors */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))',
+            gap: '8px'
+          }}>
+            {[
+              // Basics
+              "#000000", "#FFFFFF", "#7F7F7F", "#C3C3C3",
+              // Reds
+              "#FF0000", "#FF6B6B", "#DC2626", "#EF4444", "#F87171",
+              // Oranges  
+              "#FF9F1C", "#FFA500", "#FB923C", "#FDBA74",
+              // Yellows
+              "#FFE66D", "#FDE047", "#FACC15", "#FEF3C7",
+              // Greens
+              "#13eca4", "#4ECDC4", "#10B981", "#34D399", "#6EE7B7", "#059669",
+              // Blues
+              "#3B82F6", "#60A5FA", "#93C5FD", "#1E40AF", "#2563EB",
+              // Purples
+              "#6A0572", "#AB83A1", "#A855F7", "#C084FC", "#E9D5FF", "#7C3AED",
+              // Browns
+              "#8B4513", "#A0522D", "#D2691E", "#CD853F",
+              // Pinks
+              "#EC4899", "#F472B6", "#FBCFE8", "#FDA4AF"
+            ].map((color) => (
+              <button
+                key={color}
+                onClick={() => setSelectedColor(color)}
+                style={{
+                  width: '100%',
+                  aspectRatio: '1/1',
+                  minWidth: '36px',
+                  borderRadius: 'var(--radius-md)',
+                  background: color,
+                  border: selectedColor === color ? '3px solid var(--color-accent-primary)' : '2px solid var(--color-border-light)',
+                  cursor: 'pointer',
+                  boxShadow: selectedColor === color ? 'var(--shadow-md)' : 'var(--shadow-sm)',
+                  transition: 'all 0.2s'
+                }}
+                title={color}
+              />
+            ))}
+          </div>
+
+          {/* Custom color picker */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px',
+            background: 'var(--color-bg-primary)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--color-border-light)'
+          }}>
+            <span style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+              whiteSpace: 'nowrap'
+            }}>Color personalizado:</span>
+            <input
+              type="color"
+              value={selectedColor}
+              onChange={(e) => setSelectedColor(e.target.value)}
               style={{
-                width: '44px',
-                height: '44px',
+                width: '60px',
+                height: '40px',
+                border: '2px solid var(--color-border-light)',
                 borderRadius: 'var(--radius-md)',
-                background: color,
-                border: selectedColor === color ? '3px solid var(--color-accent-primary)' : '2px solid var(--color-border-light)',
-                cursor: 'pointer',
-                boxShadow: selectedColor === color ? 'var(--shadow-md)' : 'var(--shadow-sm)',
-                transition: 'all 0.2s'
+                cursor: 'pointer'
               }}
             />
-          ))}
+            <input
+              type="text"
+              value={selectedColor}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^#[0-9A-F]{0,6}$/i.test(value) || value === '') {
+                  setSelectedColor(value);
+                }
+              }}
+              placeholder="#000000"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border-light)',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                maxWidth: '120px'
+              }}
+            />
+          </div>
         </div>
       </main>
     </div>
