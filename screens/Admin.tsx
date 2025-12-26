@@ -34,9 +34,16 @@ const MinimalAdminHeader: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           textDecoration: 'none',
-          color: 'inherit'
+          color: 'inherit',
+          gap: '8px'
         }}>
-          <Logo size={120} />
+          <span style={{
+            fontWeight: 800,
+            fontSize: '14px',
+            letterSpacing: '0.5px',
+            color: 'var(--color-text-primary)'
+          }}>YO PINTO con</span>
+          <Logo size={80} />
         </Link>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
