@@ -11,22 +11,23 @@ interface TourProps {
     steps: Step[];
     tourKey: string;
     onComplete?: () => void;
+    forceShow?: boolean;
 }
 
-const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete }) => {
+const Tour: React.FC<TourProps> = ({ steps, tourKey, onComplete, forceShow }) => {
     const [currentStep, setCurrentStep] = useState<number>(-1);
     const [isVisible, setIsVisible] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
     useEffect(() => {
         const hasSeenTour = localStorage.getItem(`tour_${tourKey}`);
-        if (!hasSeenTour) {
+        if (!hasSeenTour || forceShow) {
             setTimeout(() => {
                 setIsVisible(true);
                 setCurrentStep(0);
-            }, 1500); // Wait for page load
+            }, forceShow ? 100 : 1500); // Faster trigger if forced
         }
-    }, [tourKey]);
+    }, [tourKey, forceShow]);
 
     useEffect(() => {
         if (isVisible && currentStep >= 0 && currentStep < steps.length) {

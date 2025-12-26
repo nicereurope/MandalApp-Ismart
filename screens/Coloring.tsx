@@ -21,6 +21,7 @@ const ScreenColoring: React.FC = () => {
   const templateId = searchParams.get('template');
   const creationId = searchParams.get('creation'); // NEW: Get creation ID for editing
   const { user } = useAuth();
+  const [showTour, setShowTour] = useState(false);
 
   const [zoom, setZoom] = useState(100);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -762,9 +763,37 @@ const ScreenColoring: React.FC = () => {
         </div>
       </main>
 
+      {/* Floating Help Button */}
+      <button
+        onClick={() => {
+          setShowTour(false);
+          setTimeout(() => setShowTour(true), 100);
+        }}
+        className="minimal-button-secondary"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 'var(--shadow-lg)',
+          zIndex: 90,
+          padding: 0
+        }}
+        title="Ver tour educativo de nuevo"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>help</span>
+      </button>
+
       {/* Onboarding Tour */}
       <Tour
         tourKey="editor_onboarding"
+        forceShow={showTour}
+        onComplete={() => setShowTour(false)}
         steps={[
           {
             targetId: 'tour-canvas',

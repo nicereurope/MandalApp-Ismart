@@ -240,6 +240,7 @@ const ScreenHome: React.FC = () => {
   const [publicWorksLoading, setPublicWorksLoading] = useState(true);
   const [selectedWork, setSelectedWork] = useState<any | null>(null);
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
+  const [showTour, setShowTour] = useState(false);
   const { user } = useAuth();
 
   // Filter states
@@ -782,9 +783,37 @@ const ScreenHome: React.FC = () => {
           Theme: {darkMode ? 'Dark 🌙' : 'Light ☀️'}
         </p>
       </footer>
+      {/* Floating Help Button */}
+      <button
+        onClick={() => {
+          setShowTour(false);
+          setTimeout(() => setShowTour(true), 100);
+        }}
+        className="minimal-button-secondary"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 'var(--shadow-lg)',
+          zIndex: 90,
+          padding: 0
+        }}
+        title="Ver tour educativo de nuevo"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>help</span>
+      </button>
+
       {/* Onboarding Tour */}
       <Tour
         tourKey="home_onboarding"
+        forceShow={showTour}
+        onComplete={() => setShowTour(false)}
         steps={[
           {
             targetId: 'tour-hero',
