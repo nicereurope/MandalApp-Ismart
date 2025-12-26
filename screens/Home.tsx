@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ArtCard from '../components/ArtCard';
-import Logo from '../components/Logo';
 import HeartIcon from '../components/HeartIcon';
+import Tour from '../components/Tour';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { supabase, SvgTemplate } from '../lib/supabase';
+import { supabase, SvgTemplate, UserCreation } from '../lib/supabase';
+import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
@@ -391,7 +392,7 @@ const ScreenHome: React.FC = () => {
 
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
         {/* Hero Section */}
-        <div style={{
+        <div id="tour-hero" style={{
           textAlign: 'center',
           marginBottom: '64px',
           maxWidth: '800px',
@@ -424,7 +425,7 @@ const ScreenHome: React.FC = () => {
 
         {/* Community Gallery - Featured First */}
         {publicWorks.length > 0 && (
-          <div style={{ marginBottom: '80px' }}>
+          <div id="tour-community" style={{ marginBottom: '80px' }}>
             <div style={{ textAlign: 'center', marginBottom: '48px' }}>
               <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
                 ✨ Inspiración de la Comunidad
@@ -518,7 +519,7 @@ const ScreenHome: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div style={{
+        <div id="tour-filters" style={{
           marginBottom: '48px',
           display: 'flex',
           gap: '24px',
@@ -590,7 +591,7 @@ const ScreenHome: React.FC = () => {
         </div>
 
         {/* Templates Grid - Masonry */}
-        <div className="masonry-grid" style={{ marginBottom: '80px' }}>
+        <div id="tour-templates" className="masonry-grid" style={{ marginBottom: '80px' }}>
           {loading ? (
             <div style={{
               gridColumn: '1 / -1',
@@ -781,6 +782,32 @@ const ScreenHome: React.FC = () => {
           Theme: {darkMode ? 'Dark 🌙' : 'Light ☀️'}
         </p>
       </footer>
+      {/* Onboarding Tour */}
+      <Tour
+        tourKey="home_onboarding"
+        steps={[
+          {
+            targetId: 'tour-hero',
+            title: '¡Bienvenido al Atelier!',
+            content: 'Aquí el arte de Gudiño se encuentra con tu creatividad. Un espacio para relajarte e inspirar.'
+          },
+          {
+            targetId: 'tour-community',
+            title: 'Inspiración de la Comunidad',
+            content: 'Mira lo que otros han creado. Haz clic en cualquier obra para usarla como base y crear tu propia versión (Remix).'
+          },
+          {
+            targetId: 'tour-filters',
+            title: 'Encuentra tu próximo desafío',
+            content: '¿Buscas algo específico? Filtra por categoría o nivel de dificultad para encontrar el lienzo perfecto.'
+          },
+          {
+            targetId: 'tour-templates',
+            title: 'Plantillas Originales',
+            content: 'O si prefieres, empieza desde cero con uno de nuestros diseños exclusivos cuidadosamente seleccionados.'
+          }
+        ]}
+      />
     </div>
   );
 };

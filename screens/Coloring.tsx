@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase, SvgTemplate } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import Tour from '../components/Tour';
 import '../src/styles/minimal.css';
 
 // Utility: Convert hex to {r,g,b}
@@ -468,7 +469,7 @@ const ScreenColoring: React.FC = () => {
             </h1>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div id="tour-header-actions" style={{ display: 'flex', gap: '8px' }}>
             <button
               onClick={async () => {
                 await autoSave();
@@ -514,6 +515,7 @@ const ScreenColoring: React.FC = () => {
       }}>
         {/* Canvas */}
         <div
+          id="tour-canvas"
           style={{
             maxWidth: 'min(90vw, 700px)',
             maxHeight: 'min(90vh, 700px)',
@@ -564,7 +566,7 @@ const ScreenColoring: React.FC = () => {
         </div>
 
         {/* Controls */}
-        <div style={{
+        <div id="tour-controls" style={{
           marginTop: '20px',
           display: 'flex',
           alignItems: 'center',
@@ -656,7 +658,7 @@ const ScreenColoring: React.FC = () => {
         </div>
 
         {/* Color Palette - Expanded */}
-        <div style={{
+        <div id="tour-palette" style={{
           marginTop: '16px',
           maxWidth: '700px',
           display: 'flex',
@@ -759,6 +761,33 @@ const ScreenColoring: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Onboarding Tour */}
+      <Tour
+        tourKey="editor_onboarding"
+        steps={[
+          {
+            targetId: 'tour-canvas',
+            title: 'Tu Lienzo Digital',
+            content: 'Toca cualquier sección de la mandala para llenarla con el color seleccionado. ¡Es así de simple!'
+          },
+          {
+            targetId: 'tour-palette',
+            title: 'Paleta de Colores',
+            content: 'Elige entre nuestra gama de colores predefinidos o crea el tuyo propio usando el selector personalizado.'
+          },
+          {
+            targetId: 'tour-controls',
+            title: 'Herramientas de Precisión',
+            content: 'Usa el Zoom para los detalles pequeños y el botón Deshacer para corregir cualquier error.'
+          },
+          {
+            targetId: 'tour-header-actions',
+            title: 'Guarda tu Obra',
+            content: 'Cuando termines, guarda tu creación en tu galería privada. El sistema también guarda tu progreso automáticamente.'
+          }
+        ]}
+      />
     </div>
   );
 };

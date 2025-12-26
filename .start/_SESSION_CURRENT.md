@@ -21,6 +21,7 @@
 ### 1. Mobile & Header Overhaul ⭐
 **Problem:** The logo was too large on mobile (360px), causing horizontal overflow. Non-logged users couldn't access theme toggle on mobile because the hamburger menu was hidden for them.
 **Solution:**
+- **Featured Content First:** Community gallery (last 9 works) is now shown at the top to promote engagement, followed by templates.
 - **Responsive Logo:** Created `.logo-responsive` class (120px desktop / 60px mobile).
 - **Universal Hamburger Menu:** The menu is now visible to **all users** on mobile.
 - **Header Packaging:** Header now handles wrapping and padding correctly on small screens.
