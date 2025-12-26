@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { supabase, SvgTemplate } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
@@ -8,6 +9,7 @@ import '../src/styles/minimal.css';
 
 const MinimalAdminHeader: React.FC = () => {
   const { user, signOut } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -18,13 +20,15 @@ const MinimalAdminHeader: React.FC = () => {
       background: 'var(--color-bg-primary)',
       borderBottom: '1px solid var(--color-border-light)',
     }}>
-      <div style={{
+      <div className="header-container" style={{
+        position: 'relative',
         maxWidth: '1400px',
         margin: '0 auto',
-        padding: '20px 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         <Link to="/" style={{
           display: 'flex',
@@ -36,10 +40,27 @@ const MinimalAdminHeader: React.FC = () => {
         </Link>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Theme toggle for admin too */}
+          <button
+            onClick={toggleTheme}
+            className="minimal-button-secondary"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px'
+            }}
+            title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+              {darkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+
           <button
             onClick={() => navigate('/')}
-            className="minimal-button-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            className="desktop-only minimal-button-secondary"
+            style={{ alignItems: 'center', gap: '8px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>home</span>
             <span>Inicio</span>
@@ -47,8 +68,8 @@ const MinimalAdminHeader: React.FC = () => {
 
           <button
             onClick={() => navigate('/gallery')}
-            className="minimal-button-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            className="desktop-only minimal-button-secondary"
+            style={{ alignItems: 'center', gap: '8px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
             <span>Mis Obras</span>
@@ -56,8 +77,8 @@ const MinimalAdminHeader: React.FC = () => {
 
           <button
             onClick={() => signOut()}
-            className="minimal-button-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            className="desktop-only minimal-button-secondary"
+            style={{ alignItems: 'center', gap: '8px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
             <span>Salir</span>

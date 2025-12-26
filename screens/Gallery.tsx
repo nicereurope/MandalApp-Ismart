@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { supabase, UserCreation } from '../lib/supabase';
 import { useNavigate, Link } from 'react-router-dom';
 import Logo from '../components/Logo';
@@ -7,6 +8,7 @@ import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -18,13 +20,15 @@ const MinimalHeader: React.FC = () => {
       background: 'var(--color-bg-primary)',
       borderBottom: '1px solid var(--color-border-light)',
     }}>
-      <div style={{
+      <div className="header-container" style={{
+        position: 'relative',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '20px 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         {/* Logo */}
         <Link to="/" style={{
@@ -38,23 +42,45 @@ const MinimalHeader: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Mobile Menu Button - Always visible on mobile */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-only minimal-button-secondary"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
+              {mobileMenuOpen ? 'close' : 'menu'}
+            </span>
+          </button>
+
+          {/* Desktop buttons for ALL users */}
+          <button
+            onClick={toggleTheme}
+            className="desktop-only minimal-button-secondary"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px'
+            }}
+            title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+              {darkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+
           {user ? (
             <>
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="sm:hidden minimal-button-secondary"
-              >
-                <span className="material-symbols-outlined">
-                  {mobileMenuOpen ? 'close' : 'menu'}
-                </span>
-              </button>
-
-              {/* Desktop Buttons */}
               <button
                 onClick={() => navigate('/')}
-                className="hidden sm:flex minimal-button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="desktop-only minimal-button-secondary"
+                style={{ alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>home</span>
                 <span>Inicio</span>
@@ -63,8 +89,8 @@ const MinimalHeader: React.FC = () => {
               {isAdmin && (
                 <button
                   onClick={() => navigate('/admin')}
-                  className="hidden sm:flex minimal-button-primary"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                  className="desktop-only minimal-button-primary"
+                  style={{ alignItems: 'center', gap: '8px' }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>admin_panel_settings</span>
                   <span>Admin</span>
@@ -73,71 +99,114 @@ const MinimalHeader: React.FC = () => {
 
               <button
                 onClick={() => signOut()}
-                className="hidden sm:flex minimal-button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="desktop-only minimal-button-secondary"
+                style={{ alignItems: 'center', gap: '8px' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>logout</span>
                 <span>Salir</span>
               </button>
             </>
           ) : (
-            <button
-              onClick={() => navigate('/auth')}
-              className="minimal-button-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
-              <span>Login</span>
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/auth')}
+                className="desktop-only minimal-button-primary"
+                style={{ alignItems: 'center', gap: '8px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
+                <span>Login</span>
+              </button>
+            </>
           )}
         </nav>
       </div>
 
-      {/* Mobile Menu */}
-      {user && mobileMenuOpen && (
-        <div className="sm:hidden" style={{
+      {/* Mobile Menu - For all users */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
+          width: '100%',
+          maxWidth: '100vw',
           borderTop: '1px solid var(--color-border)',
           padding: '16px',
           background: 'var(--color-bg-primary)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px'
+          gap: '8px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          zIndex: 40
         }}>
+          {/* Theme toggle in mobile menu */}
           <button
             onClick={() => {
-              navigate('/');
+              toggleTheme();
               setMobileMenuOpen(false);
             }}
             className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
           >
-            <span className="material-symbols-outlined">home</span>
-            Inicio
+            <span className="material-symbols-outlined">
+              {darkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+            {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
           </button>
-          {isAdmin && (
-            <button
-              onClick={() => {
-                navigate('/admin');
-                setMobileMenuOpen(false);
-              }}
-              className="minimal-button-primary"
-              style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
-            >
-              <span className="material-symbols-outlined">admin_panel_settings</span>
-              Admin
-            </button>
+
+          {user ? (
+            <>
+              <button
+                onClick={() => {
+                  navigate('/');
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">home</span>
+                Inicio
+              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    navigate('/admin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="minimal-button-primary"
+                  style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+                >
+                  <span className="material-symbols-outlined">admin_panel_settings</span>
+                  Admin
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  signOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">logout</span>
+                Cerrar Sesión
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  navigate('/auth');
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-primary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">login</span>
+                Iniciar Sesión
+              </button>
+            </>
           )}
-          <button
-            onClick={() => {
-              signOut();
-              setMobileMenuOpen(false);
-            }}
-            className="minimal-button-secondary"
-            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', color: '#DC2626' }}
-          >
-            <span className="material-symbols-outlined">logout</span>
-            Cerrar Sesión
-          </button>
         </div>
       )}
     </header>

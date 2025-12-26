@@ -60,7 +60,23 @@ const MinimalHeader: React.FC = () => {
             </span>
           </button>
 
-          {/* Desktop Buttons - Only for logged users */}
+          {/* Desktop buttons for ALL users */}
+          <button
+            onClick={toggleTheme}
+            className="desktop-only minimal-button-secondary"
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px'
+            }}
+            title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+              {darkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
+
           {user ? (
             <>
               <button
@@ -94,23 +110,6 @@ const MinimalHeader: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Desktop buttons for non-logged users */}
-              <button
-                onClick={toggleTheme}
-                className="desktop-only minimal-button-secondary"
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '40px',
-                  height: '40px'
-                }}
-                title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                  {darkMode ? 'light_mode' : 'dark_mode'}
-                </span>
-              </button>
-
               <button
                 onClick={() => navigate('/auth')}
                 className="desktop-only minimal-button-primary"
@@ -171,6 +170,19 @@ const MinimalHeader: React.FC = () => {
                   Admin
                 </button>
               )}
+              <button
+                onClick={() => {
+                  toggleTheme();
+                  setMobileMenuOpen(false);
+                }}
+                className="minimal-button-secondary"
+                style={{ width: '100%', justifyContent: 'flex-start', gap: '12px', display: 'flex', alignItems: 'center' }}
+              >
+                <span className="material-symbols-outlined">
+                  {darkMode ? 'light_mode' : 'dark_mode'}
+                </span>
+                {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+              </button>
               <button
                 onClick={() => {
                   signOut();
@@ -534,7 +546,7 @@ const ScreenHome: React.FC = () => {
         {publicWorks.length > 0 && (
           <div>
             <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-              <h2 className="text-h1" style={{ marginBottom: '16px' }}>
+              <h2 className="text-h1" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>
                 🎨 Galería Comunitaria
               </h2>
               <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
