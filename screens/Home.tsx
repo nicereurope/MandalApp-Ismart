@@ -400,10 +400,21 @@ const ScreenHome: React.FC = () => {
           margin: '0 auto 64px'
         }}>
           <h1 className="text-hero" style={{
-            marginBottom: '8px',
-            color: 'var(--color-text-primary)'
+            marginBottom: '16px',
+            color: 'var(--color-text-primary)',
+            display: 'flex',
+            justifyContent: 'center'
           }}>
-            GUDIÑO Y <span style={{ color: 'var(--color-accent-primary)' }}>TÚ</span>
+            <img
+              src={darkMode ? '/img/yo_pinto_white.svg' : '/img/yo_pinto_black.svg'}
+              alt="Yo Pinto"
+              style={{
+                height: 'auto',
+                maxHeight: '120px',
+                width: '100%',
+                maxWidth: '600px'
+              }}
+            />
           </h1>
           <p style={{
             fontSize: '20px',
