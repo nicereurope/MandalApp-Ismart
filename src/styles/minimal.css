@@ -46,12 +46,12 @@
   --color-bg-secondary: #121212;
   --color-bg-tertiary: #1E1E1E;
 
-  --color-text-primary: #FAFAFA;
-  --color-text-secondary: #A8A8A8;
-  --color-text-tertiary: #737373;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #D1D1D1;
+  --color-text-tertiary: #A1A1A1;
 
-  --color-border: #363636;
-  --color-border-light: #262626;
+  --color-border: #404040;
+  --color-border-light: #2A2A2A;
 }
 
 /* Utility Classes */

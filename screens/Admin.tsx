@@ -120,6 +120,8 @@ const ScreenAdmin: React.FC = () => {
   const [difficulties, setDifficulties] = useState<any[]>([]);
   const [newCatName, setNewCatName] = useState('');
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [editingUser, setEditingUser] = useState<any | null>(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -928,52 +930,151 @@ const ScreenAdmin: React.FC = () => {
           {/* Users View */}
           {activeTab === 'users' && (
             <div style={{ maxWidth: '1200px' }}>
-              <h2 className="text-h2" style={{ marginBottom: '24px' }}>Gestión de Usuarios</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 className="text-h2" style={{ margin: 0 }}>Gestión de Usuarios</h2>
+                <div style={{ position: 'relative', width: '300px' }}>
+                  <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-tertiary)', fontSize: '20px' }}>search</span>
+                  <input
+                    type="text"
+                    placeholder="Buscar por email..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="minimal-input"
+                    style={{ paddingLeft: '40px' }}
+                  />
+                </div>
+              </div>
+
+              {editingUser && (
+                <div className="minimal-card" style={{ marginBottom: '24px', padding: '24px', borderLeft: '4px solid var(--color-accent-primary)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h3 className="text-h3" style={{ margin: 0 }}>Editar Usuario: {editingUser.email}</h3>
+                    <button onClick={() => setEditingUser(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                      <span className="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: '200px' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Rol</label>
+                      <select
+                        value={editingUser.role}
+                        onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
+                        className="minimal-input"
+                      >
+                        <option value="user">Usuario (Normal)</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '20px' }}>
+                      <input
+                        type="checkbox"
+                        id="user-active-toggle"
+                        checked={editingUser.is_active !== false}
+                        onChange={(e) => setEditingUser({ ...editingUser, is_active: e.target.checked })}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                      <label htmlFor="user-active-toggle" style={{ fontWeight: 600 }}>Usuario Activo</label>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1 }}>
+                      <button
+                        className="minimal-button-primary"
+                        style={{ width: '100%', padding: '10px' }}
+                        onClick={async () => {
+                          const { error } = await supabase.from('profiles').update({
+                            role: editingUser.role,
+                            is_active: editingUser.is_active
+                          }).eq('id', editingUser.id);
+
+                          if (error) alert(error.message);
+                          else {
+                            setEditingUser(null);
+                            await loadData();
+                            setMessage('Usuario actualizado correctamente');
+                          }
+                        }}
+                      >
+                        Guardar Cambios
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="minimal-card" style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--color-border)' }}>
                       <th style={{ padding: '16px' }}>Email</th>
                       <th style={{ padding: '16px' }}>Rol</th>
+                      <th style={{ padding: '16px' }}>Estado</th>
                       <th style={{ padding: '16px' }}>Fecha Registro</th>
                       <th style={{ padding: '16px', textAlign: 'right' }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {allUsers.map(u => (
-                      <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                        <td style={{ padding: '16px' }}>{u.email}</td>
-                        <td style={{ padding: '16px' }}>
-                          <span style={{
-                            padding: '4px 12px',
-                            borderRadius: '100px',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            background: u.role === 'admin' ? '#FEE2E2' : '#E0E7FF',
-                            color: u.role === 'admin' ? '#991B1B' : '#4338CA'
-                          }}>
-                            {u.role?.toUpperCase() || 'USER'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '16px', color: 'var(--color-text-tertiary)' }}>
-                          {new Date(u.created_at).toLocaleDateString()}
-                        </td>
-                        <td style={{ padding: '16px', textAlign: 'right' }}>
-                          <button
-                            className="minimal-button-secondary"
-                            style={{ fontSize: '12px', padding: '4px 12px' }}
-                            onClick={async () => {
-                              const newRole = u.role === 'admin' ? 'user' : 'admin';
-                              const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', u.id);
-                              if (error) alert(error.message);
-                              else await loadData();
-                            }}
-                          >
-                            Hacer {u.role === 'admin' ? 'Usuario' : 'Admin'}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {allUsers
+                      .filter(u => u.email.toLowerCase().includes(userSearch.toLowerCase()))
+                      .map(u => (
+                        <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border)', opacity: u.is_active === false ? 0.6 : 1 }}>
+                          <td style={{ padding: '16px' }}>{u.email}</td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{
+                              padding: '4px 12px',
+                              borderRadius: '100px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              background: u.role === 'admin' ? '#FEE2E2' : '#E0E7FF',
+                              color: u.role === 'admin' ? '#991B1B' : '#4338CA',
+                              letterSpacing: '0.5px'
+                            }}>
+                              {u.role?.toUpperCase() || 'USER'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '16px' }}>
+                            <span style={{
+                              padding: '4px 12px',
+                              borderRadius: '100px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              background: u.is_active !== false ? '#D1FAE5' : '#F3F4F6',
+                              color: u.is_active !== false ? '#065F46' : '#6B7280'
+                            }}>
+                              {u.is_active !== false ? 'ACTIVO' : 'INACTIVO'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '16px', color: 'var(--color-text-tertiary)', fontSize: '13px' }}>
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </td>
+                          <td style={{ padding: '16px', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                              <button
+                                className="minimal-button-secondary"
+                                style={{ fontSize: '12px', padding: '6px 12px', height: 'auto' }}
+                                onClick={() => setEditingUser(u)}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className="minimal-button-secondary"
+                                style={{
+                                  fontSize: '12px',
+                                  padding: '6px 12px',
+                                  height: 'auto',
+                                  color: u.is_active !== false ? '#DC2626' : '#059669',
+                                  borderColor: u.is_active !== false ? '#FCA5A5' : '#6EE7B7'
+                                }}
+                                onClick={async () => {
+                                  const { error } = await supabase.from('profiles').update({ is_active: !(u.is_active !== false) }).eq('id', u.id);
+                                  if (error) alert(error.message);
+                                  else await loadData();
+                                }}
+                              >
+                                {u.is_active !== false ? 'Desactivar' : 'Activar'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
