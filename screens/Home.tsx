@@ -255,6 +255,8 @@ const ScreenHome: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableDifficulties, setAvailableDifficulties] = useState<any[]>([]);
 
   useEffect(() => {
     const loadTemplates = async () => {
@@ -274,7 +276,16 @@ const ScreenHome: React.FC = () => {
       }
     };
 
+    const loadMetadata = async () => {
+      const { data: catData } = await supabase.from('app_categories').select('name').order('name');
+      if (catData) setAvailableCategories(catData.map(c => c.name));
+
+      const { data: diffData } = await supabase.from('app_difficulties').select('*').order('order');
+      if (diffData) setAvailableDifficulties(diffData);
+    };
+
     loadTemplates();
+    loadMetadata();
   }, []);
 
   // Load public works
@@ -349,10 +360,7 @@ const ScreenHome: React.FC = () => {
     loadUserFavorites();
   }, [user]);
 
-  // Get unique categories from templates
-  const categories = Array.from(new Set(templates.map(t => t.category))).sort();
-
-  // Apply filters
+  // Applying filters
   const filteredTemplates = templates.filter(template => {
     if (searchTerm && !template.title.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
@@ -646,10 +654,10 @@ const ScreenHome: React.FC = () => {
               value={selectedDifficulty || ''}
               onChange={(e) => setSelectedDifficulty(e.target.value as any || null)}
             >
-              <option value="">Dificultad</option>
-              <option value="Principiante">Inicial</option>
-              <option value="Intermedio">Intermedio</option>
-              <option value="Avanzado">Avanzado</option>
+              <option value="">Todas (Dificultad)</option>
+              {availableDifficulties.map(diff => (
+                <option key={diff.id} value={diff.name}>{diff.label}</option>
+              ))}
             </select>
             <span className="material-symbols-outlined" style={{
               position: 'absolute',
@@ -679,9 +687,9 @@ const ScreenHome: React.FC = () => {
               value={selectedCategory || ''}
               onChange={(e) => setSelectedCategory(e.target.value || null)}
             >
-              <option value="">Categoría</option>
+              <option value="">Todas (Categorías)</option>
               {user && <option value="Favoritos">❤️ Favoritos</option>}
-              {categories.map(category => (
+              {availableCategories.map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
             </select>

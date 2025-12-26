@@ -113,30 +113,56 @@ const ScreenAdmin: React.FC = () => {
   });
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'artworks' | 'users' | 'settings'>('dashboard');
+  const [stats, setStats] = useState({ templates: 0, users: 0, creations: 0 });
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [difficulties, setDifficulties] = useState<any[]>([]);
+  const [newCatName, setNewCatName] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      // 1. Templates
+      const { data: tData } = await supabase.from('svg_templates').select('*').order('created_at', { ascending: false });
+      setTemplates(tData || []);
+
+      // 2. Stats
+      const { count: tCount } = await supabase.from('svg_templates').select('*', { count: 'exact', head: true });
+      const { count: uCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+      const { count: cCount } = await supabase.from('user_creations').select('*', { count: 'exact', head: true });
+      setStats({ templates: tCount || 0, users: uCount || 0, creations: cCount || 0 });
+
+      // 3. User lists
+      const { data: uData } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      setAllUsers(uData || []);
+
+      // 4. Categories & Difficulties
+      const { data: catData } = await supabase.from('app_categories').select('*').order('name');
+      setCategories(catData || []);
+      const { data: diffData } = await supabase.from('app_difficulties').select('*').order('order');
+      setDifficulties(diffData || []);
+
+    } catch (error: any) {
+      console.error('Error loading data:', error);
+      setMessage('Error al cargar datos: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAdmin) {
       navigate('/');
       return;
     }
-    loadTemplates();
+    loadData();
   }, [isAdmin, navigate]);
 
   const loadTemplates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('svg_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTemplates(data || []);
-    } catch (error: any) {
-      console.error('Error loading templates:', error);
-      setMessage('Error al cargar plantillas: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+    const { data } = await supabase.from('svg_templates').select('*').order('created_at', { ascending: false });
+    setTemplates(data || []);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,517 +335,730 @@ const ScreenAdmin: React.FC = () => {
     <div style={{
       minHeight: '100vh',
       background: 'var(--color-bg-secondary)',
-      fontFamily: 'var(--font-primary)'
+      fontFamily: 'var(--font-primary)',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       <MinimalAdminHeader />
 
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 16px' }}>
-        {/* Upload Form */}
-        <section className="minimal-card" style={{ marginBottom: '48px', padding: '32px' }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '32px'
-          }}>
-            <h2 className="text-h2" style={{ margin: 0 }}>
-              {editingId ? 'Editar Plantilla' : 'Nueva Plantilla'}
-            </h2>
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                className="minimal-button-secondary"
-                style={{ background: '#FEF3C7', color: '#92400E', borderColor: '#FCD34D' }}
-              >
-                Cancelar Edición
-              </button>
-            )}
-          </div>
+      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+        {/* Sidebar */}
+        <aside style={{
+          width: '240px',
+          background: 'var(--color-bg-primary)',
+          borderRight: '1px solid var(--color-border-light)',
+          padding: '24px 12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          position: 'sticky',
+          top: '80px',
+          height: 'calc(100vh - 80px)',
+          overflowY: 'auto'
+        }} className="hidden-mobile">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={activeTab === 'dashboard' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+          >
+            <span className="material-symbols-outlined">dashboard</span>
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('artworks')}
+            className={activeTab === 'artworks' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+          >
+            <span className="material-symbols-outlined">palette</span>
+            Obras (Plantillas)
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={activeTab === 'users' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+          >
+            <span className="material-symbols-outlined">group</span>
+            Usuarios
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={activeTab === 'settings' ? 'minimal-button-primary' : 'minimal-button-secondary'}
+            style={{ width: '100%', justifyContent: 'flex-start', gap: '12px' }}
+          >
+            <span className="material-symbols-outlined">settings</span>
+            Configuración
+          </button>
+        </aside>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Title */}
-            <div>
-              <label htmlFor="title" className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Título *
-              </label>
-              <input
-                id="title"
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-                placeholder="Mandala de Flores"
-                disabled={uploading}
-                className="minimal-input"
-              />
-            </div>
+        {/* Mobile Navigation (Floating Icons) */}
+        <div className="mobile-only" style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--color-bg-primary)',
+          padding: '8px 16px',
+          borderRadius: '100px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          display: 'flex',
+          gap: '16px',
+          zIndex: 100,
+          border: '1px solid var(--color-border)'
+        }}>
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            style={{ background: 'none', border: 'none', color: activeTab === 'dashboard' ? 'var(--color-accent-primary)' : 'var(--color-text-tertiary)', padding: '8px' }}
+          >
+            <span className="material-symbols-outlined">dashboard</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('artworks')}
+            style={{ background: 'none', border: 'none', color: activeTab === 'artworks' ? 'var(--color-accent-primary)' : 'var(--color-text-tertiary)', padding: '8px' }}
+          >
+            <span className="material-symbols-outlined">palette</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            style={{ background: 'none', border: 'none', color: activeTab === 'users' ? 'var(--color-accent-primary)' : 'var(--color-text-tertiary)', padding: '8px' }}
+          >
+            <span className="material-symbols-outlined">group</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            style={{ background: 'none', border: 'none', color: activeTab === 'settings' ? 'var(--color-accent-primary)' : 'var(--color-text-tertiary)', padding: '8px' }}
+          >
+            <span className="material-symbols-outlined">settings</span>
+          </button>
+        </div>
 
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Descripción
-              </label>
-              <textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Una hermosa mandala con patrones florales"
-                disabled={uploading}
-                rows={3}
-                className="minimal-input"
-                style={{ resize: 'vertical', minHeight: '80px' }}
-              />
-            </div>
+        {/* Content Area */}
+        <main style={{ flex: 1, padding: '24px 32px' }}>
 
-            {/* Difficulty & Category Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-              <div>
-                <label htmlFor="difficulty" className="text-small" style={{
-                  display: 'block',
-                  fontWeight: 600,
-                  marginBottom: '8px',
-                  color: 'var(--color-text-primary)'
-                }}>
-                  Dificultad *
-                </label>
-                <select
-                  id="difficulty"
-                  value={formData.difficulty}
-                  onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as any })}
-                  required
-                  disabled={uploading}
-                  className="minimal-input"
-                >
-                  <option value="Principiante">Principiante</option>
-                  <option value="Intermedio">Intermedio</option>
-                  <option value="Avanzado">Avanzado</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="category" className="text-small" style={{
-                  display: 'block',
-                  fontWeight: 600,
-                  marginBottom: '8px',
-                  color: 'var(--color-text-primary)'
-                }}>
-                  Categoría
-                </label>
-                <input
-                  id="category"
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  placeholder="Mandala"
-                  disabled={uploading}
-                  className="minimal-input"
-                />
-              </div>
-            </div>
-
-            {/* Background Color */}
-            <div>
-              <label htmlFor="backgroundColor" className="text-small" style={{
-                display: 'block',
-                fontWeight: 600,
-                marginBottom: '8px',
-                color: 'var(--color-text-primary)'
-              }}>
-                Color de Fondo (Preview)
-              </label>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                <input
-                  id="backgroundColor"
-                  type="color"
-                  value={formData.backgroundColor}
-                  onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                  disabled={uploading}
-                  style={{
-                    width: '80px',
-                    height: '44px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '2px solid var(--color-border)',
-                    cursor: 'pointer'
-                  }}
-                />
-                <input
-                  type="text"
-                  value={formData.backgroundColor}
-                  onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                  placeholder="#ffffff"
-                  disabled={uploading}
-                  className="minimal-input"
-                  style={{ flex: 1 }}
-                />
-              </div>
-              <p className="text-tiny" style={{
-                color: 'var(--color-text-tertiary)',
-                marginTop: '4px'
-              }}>
-                Color de fondo para la vista previa en las tarjetas
-              </p>
-            </div>
-
-            {/* SECCION CAPA BASE (ARCHIVO A) */}
-            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>image</span>
-                <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa Base (Archivo A) *</h3>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <input
-                  id="svgFile"
-                  type="file"
-                  accept=".svg"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                  style={{ display: 'none' }}
-                />
-                <label
-                  htmlFor="svgFile"
-                  className="minimal-button-primary"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    width: '100%',
-                    justifyContent: 'center',
-                    padding: '14px'
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>upload_file</span>
-                  <span style={{ fontSize: '16px', fontWeight: 600 }}>
-                    {formData.svgContent ? 'CAMBIAR ARCHIVO BASE (.SVG)' : 'SUBIR ARCHIVO BASE (.SVG)'}
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px', marginTop: '-24px' }}>
-              <label htmlFor="svgContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                Código SVG Base (Para control manual)
-              </label>
-              <textarea
-                id="svgContent"
-                value={formData.svgContent}
-                onChange={(e) => setFormData({ ...formData, svgContent: e.target.value })}
-                required
-                placeholder='El código aparecerá aquí al seleccionar el archivo...'
-                disabled={uploading}
-                rows={5}
-                className="minimal-input"
-                style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
-              />
-            </div>
-
-            {/* SECCION CAPA SOMBRAS (ARCHIVO B) */}
-            <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>layers</span>
-                <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa de Sombras (Archivo B)</h3>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <input
-                  id="shadowFile"
-                  type="file"
-                  accept=".svg"
-                  onChange={handleShadowUpload}
-                  disabled={uploading}
-                  style={{ display: 'none' }}
-                />
-                <label
-                  htmlFor="shadowFile"
-                  className="minimal-button-primary"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    width: '100%',
-                    justifyContent: 'center',
-                    padding: '14px',
-                    background: '#1A535C',
-                    borderColor: '#1A535C'
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>layers</span>
-                  <span style={{ fontSize: '16px', fontWeight: 600 }}>
-                    {formData.shadowContent ? 'CAMBIAR ARCHIVO DE SOMBRAS (.SVG)' : 'SUBIR ARCHIVO DE SOMBRAS (.SVG)'}
-                  </span>
-                </label>
-              </div>
-
-              <div>
-                <label htmlFor="shadowContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                  Código SVG Sombras (Opcional)
-                </label>
-                <textarea
-                  id="shadowContent"
-                  value={formData.shadowContent}
-                  onChange={(e) => setFormData({ ...formData, shadowContent: e.target.value })}
-                  placeholder='Los detalles de sombras aparecerán aquí al subir...'
-                  disabled={uploading}
-                  rows={5}
-                  className="minimal-input"
-                  style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
-                />
-              </div>
-            </div>
-
-            {/* SVG Preview Combined */}
-            {formData.svgContent && (
+          {/* Dashboard View */}
+          {activeTab === 'dashboard' && (
+            <div style={{ maxWidth: '1200px' }}>
+              <h2 className="text-h2" style={{ marginBottom: '32px' }}>Panel de Control</h2>
               <div style={{
-                padding: '24px',
-                background: 'var(--color-bg-tertiary)',
-                borderRadius: 'var(--radius-md)',
-                border: '2px dashed var(--color-border)'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '24px'
               }}>
-                <h3 className="text-h3" style={{
-                  margin: '0 0 16px 0',
-                  color: 'var(--color-text-secondary)'
-                }}>
-                  Vista Previa {formData.shadowContent ? '(Combinada)' : ''}
-                </h3>
-                <div
-                  style={{
-                    maxWidth: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    aspectRatio: '1/1',
-                    maxHeight: '400px'
-                  }}
-                >
-                  <div
-                    dangerouslySetInnerHTML={{ __html: formData.svgContent }}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  />
-                  {formData.shadowContent && (
-                    <div
-                      className="svg-shadow-overlay"
-                      dangerouslySetInnerHTML={{ __html: formData.shadowContent }}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        pointerEvents: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    />
-                  )}
+                <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--color-accent-primary)', marginBottom: '16px' }}>palette</span>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.templates}</div>
+                  <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Plantillas Base</div>
+                </div>
+                <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#1A535C', marginBottom: '16px' }}>brush</span>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.creations}</div>
+                  <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Obras Coloreadas</div>
+                </div>
+                <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#FF6B6B', marginBottom: '16px' }}>group</span>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.users}</div>
+                  <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Usuarios Registrados</div>
                 </div>
               </div>
-            )}
 
-            {/* Message */}
-            {message && (
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '14px',
-                fontWeight: 500,
-                background: message.includes('Error') ? '#FEE2E2' : '#D1FAE5',
-                color: message.includes('Error') ? '#991B1B' : '#065F46',
-                border: `1px solid ${message.includes('Error') ? '#FCA5A5' : '#6EE7B7'}`
-              }}>
-                {message}
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="minimal-button-primary"
-              disabled={uploading}
-              style={{ width: '100%' }}
-            >
-              {uploading ? (
-                editingId ? 'Actualizando...' : 'Subiendo...'
-              ) : (
-                editingId ? 'Actualizar Plantilla' : 'Subir Plantilla'
-              )}
-            </button>
-          </form>
-        </section>
-
-        {/* Templates List */}
-        <section>
-          <div style={{ marginBottom: '24px' }}>
-            <h2 className="text-h2" style={{ margin: 0 }}>
-              Plantillas Existentes ({templates.length})
-            </h2>
-          </div>
-
-          {loading ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '80px 0',
-              color: 'var(--color-text-secondary)'
-            }}>
-              Cargando plantillas...
-            </div>
-          ) : templates.length === 0 ? (
-            <div className="minimal-card" style={{
-              textAlign: 'center',
-              padding: '80px 24px'
-            }}>
-              <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
-                No hay plantillas aún
-              </p>
-            </div>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-              gap: '24px'
-            }}>
-              {templates.map((template) => (
-                <div key={template.id} className="minimal-card" style={{ padding: 0, overflow: 'hidden' }}>
-                  {/* Preview */}
-                  <div style={{
-                    background: 'var(--color-bg-tertiary)',
-                    padding: '24px',
-                    height: '200px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <div
-                      dangerouslySetInnerHTML={{ __html: template.svg_content }}
-                      style={{ maxWidth: '100%', maxHeight: '100%' }}
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div style={{ padding: '16px' }}>
-                    <h3 className="text-h3" style={{
-                      margin: '0 0 8px 0',
-                      fontSize: '16px',
-                      fontWeight: 600
-                    }}>
-                      {template.title}
-                    </h3>
-                    {template.description && (
-                      <p className="text-small" style={{
-                        margin: '0 0 12px 0',
-                        color: 'var(--color-text-secondary)',
-                        lineHeight: 1.4
-                      }}>
-                        {template.description}
-                      </p>
-                    )}
-
-                    {/* Meta */}
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '12px',
-                      fontSize: '13px',
-                      flexWrap: 'wrap',
-                      gap: '8px'
-                    }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <span style={{
-                          padding: '4px 12px',
-                          borderRadius: 'var(--radius-md)',
-                          fontWeight: 600,
-                          background: template.is_active ? '#D1FAE5' : '#FEE2E2',
-                          color: template.is_active ? '#065F46' : '#991B1B'
-                        }}>
-                          {template.is_active ? 'Activa' : 'Inactiva'}
-                        </span>
-                        {template.shadow_content && (
-                          <span style={{
-                            padding: '4px 12px',
-                            borderRadius: 'var(--radius-md)',
-                            fontWeight: 600,
-                            background: '#E0E7FF',
-                            color: '#4338CA'
-                          }}>
-                            Sombras
-                          </span>
-                        )}
-                      </div>
-                      <span style={{ color: 'var(--color-text-tertiary)' }}>
-                        {new Date(template.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        onClick={() => handleEdit(template)}
-                        className="minimal-button-secondary"
-                        style={{
-                          flex: 1,
-                          fontSize: '13px',
-                          padding: '8px',
-                          background: '#ECFDF5',
-                          color: '#047857',
-                          borderColor: '#6EE7B7'
-                        }}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => toggleTemplateStatus(template.id, template.is_active)}
-                        className="minimal-button-secondary"
-                        style={{
-                          flex: 1,
-                          fontSize: '13px',
-                          padding: '8px'
-                        }}
-                      >
-                        {template.is_active ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button
-                        onClick={() => deleteTemplate(template.id)}
-                        className="minimal-button-secondary"
-                        style={{
-                          flex: 1,
-                          fontSize: '13px',
-                          padding: '8px',
-                          background: '#FEE2E2',
-                          color: '#DC2626',
-                          borderColor: '#FCA5A5'
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
+              <div className="minimal-card" style={{ marginTop: '32px', padding: '32px' }}>
+                <h3 className="text-h3" style={{ marginBottom: '16px' }}>Acciones Rápidas</h3>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                  <button onClick={() => setActiveTab('artworks')} className="minimal-button-primary" style={{ gap: '8px' }}>
+                    <span className="material-symbols-outlined">add</span> Subir Nueva Plantilla
+                  </button>
+                  <button onClick={() => setActiveTab('users')} className="minimal-button-secondary" style={{ gap: '8px' }}>
+                    <span className="material-symbols-outlined">manage_accounts</span> Administrar Usuarios
+                  </button>
+                  <button onClick={() => setActiveTab('settings')} className="minimal-button-secondary" style={{ gap: '8px' }}>
+                    <span className="material-symbols-outlined">category</span> Ajustar Categorías
+                  </button>
                 </div>
-              ))}
+              </div>
             </div>
           )}
-        </section>
-      </main>
-    </div >
+
+          {/* Artworks View */}
+          {activeTab === 'artworks' && (
+            <div style={{ maxWidth: '1400px' }}>
+              <section className="minimal-card" style={{ marginBottom: '48px', padding: '32px' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '32px'
+                }}>
+                  <h2 className="text-h2" style={{ margin: 0 }}>
+                    {editingId ? 'Editar Plantilla' : 'Nueva Plantilla'}
+                  </h2>
+                  {editingId && (
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      className="minimal-button-secondary"
+                      style={{ background: '#FEF3C7', color: '#92400E', borderColor: '#FCD34D' }}
+                    >
+                      Cancelar Edición
+                    </button>
+                  )}
+                </div>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Title */}
+                  <div>
+                    <label htmlFor="title" className="text-small" style={{
+                      display: 'block',
+                      fontWeight: 600,
+                      marginBottom: '8px',
+                      color: 'var(--color-text-primary)'
+                    }}>
+                      Título *
+                    </label>
+                    <input
+                      id="title"
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                      placeholder="Mandala de Flores"
+                      disabled={uploading}
+                      className="minimal-input"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label htmlFor="description" className="text-small" style={{
+                      display: 'block',
+                      fontWeight: 600,
+                      marginBottom: '8px',
+                      color: 'var(--color-text-primary)'
+                    }}>
+                      Descripción
+                    </label>
+                    <textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Una hermosa mandala con patrones florales"
+                      disabled={uploading}
+                      rows={3}
+                      className="minimal-input"
+                      style={{ resize: 'vertical', minHeight: '80px' }}
+                    />
+                  </div>
+
+                  {/* Difficulty & Category Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <div>
+                      <label htmlFor="difficulty" className="text-small" style={{
+                        display: 'block',
+                        fontWeight: 600,
+                        marginBottom: '8px',
+                        color: 'var(--color-text-primary)'
+                      }}>
+                        Dificultad *
+                      </label>
+                      <select
+                        id="difficulty"
+                        value={formData.difficulty}
+                        onChange={(e) => setFormData({ ...formData, difficulty: e.target.value as any })}
+                        required
+                        disabled={uploading}
+                        className="minimal-input"
+                      >
+                        {difficulties.map(diff => (
+                          <option key={diff.id} value={diff.name}>{diff.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="category" className="text-small" style={{
+                        display: 'block',
+                        fontWeight: 600,
+                        marginBottom: '8px',
+                        color: 'var(--color-text-primary)'
+                      }}>
+                        Categoría
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        {!isAddingCategory ? (
+                          <>
+                            <select
+                              id="category"
+                              value={formData.category}
+                              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                              disabled={uploading}
+                              className="minimal-input"
+                              style={{ flex: 1 }}
+                            >
+                              <option value="">Seleccionar...</option>
+                              {categories.map(cat => (
+                                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => setIsAddingCategory(true)}
+                              className="minimal-button-secondary"
+                              style={{ padding: '0 12px' }}
+                              title="Nueva Categoría"
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              value={newCatName}
+                              onChange={(e) => setNewCatName(e.target.value)}
+                              placeholder="Nombre de nueva categoría"
+                              className="minimal-input"
+                              style={{ flex: 1 }}
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!newCatName.trim()) {
+                                  setIsAddingCategory(false);
+                                  return;
+                                }
+                                try {
+                                  const { data, error } = await supabase.from('app_categories').insert({ name: newCatName.trim() }).select().single();
+                                  if (error) throw error;
+                                  setCategories([...categories, data].sort((a, b) => a.name.localeCompare(b.name)));
+                                  setFormData({ ...formData, category: data.name });
+                                  setNewCatName('');
+                                  setIsAddingCategory(false);
+                                } catch (err: any) {
+                                  alert('Error al crear categoría: ' + err.message);
+                                }
+                              }}
+                              className="minimal-button-primary"
+                              style={{ padding: '0 12px' }}
+                            >
+                              <span className="material-symbols-outlined">check</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingCategory(false);
+                                setNewCatName('');
+                              }}
+                              className="minimal-button-secondary"
+                              style={{ padding: '0 12px' }}
+                            >
+                              <span className="material-symbols-outlined">close</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Background Color */}
+                  <div>
+                    <label htmlFor="backgroundColor" className="text-small" style={{
+                      display: 'block',
+                      fontWeight: 600,
+                      marginBottom: '8px',
+                      color: 'var(--color-text-primary)'
+                    }}>
+                      Color de Fondo (Preview)
+                    </label>
+                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <input
+                        id="backgroundColor"
+                        type="color"
+                        value={formData.backgroundColor}
+                        onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                        disabled={uploading}
+                        style={{
+                          width: '80px',
+                          height: '44px',
+                          borderRadius: 'var(--radius-md)',
+                          border: '2px solid var(--color-border)',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={formData.backgroundColor}
+                        onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                        placeholder="#ffffff"
+                        disabled={uploading}
+                        className="minimal-input"
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                    <p className="text-tiny" style={{
+                      color: 'var(--color-text-tertiary)',
+                      marginTop: '4px'
+                    }}>
+                      Color de fondo para la vista previa en las tarjetas
+                    </p>
+                  </div>
+
+                  {/* SECCION CAPA BASE (ARCHIVO A) */}
+                  <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                      <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>image</span>
+                      <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa Base (Archivo A) *</h3>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <input
+                        id="svgFile"
+                        type="file"
+                        accept=".svg"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        style={{ display: 'none' }}
+                      />
+                      <label
+                        htmlFor="svgFile"
+                        className="minimal-button-primary"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          justifyContent: 'center',
+                          padding: '14px'
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>upload_file</span>
+                        <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                          {formData.svgContent ? 'CAMBIAR ARCHIVO BASE (.SVG)' : 'SUBIR ARCHIVO BASE (.SVG)'}
+                        </span>
+                      </label>
+                    </div>
+
+                    <label htmlFor="svgContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                      Código SVG Base (Para control manual)
+                    </label>
+                    <textarea
+                      id="svgContent"
+                      value={formData.svgContent}
+                      onChange={(e) => setFormData({ ...formData, svgContent: e.target.value })}
+                      required
+                      placeholder='El código aparecerá aquí al seleccionar el archivo...'
+                      disabled={uploading}
+                      rows={5}
+                      className="minimal-input"
+                      style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
+                    />
+                  </div>
+
+                  {/* SECCION CAPA SOMBRAS (ARCHIVO B) */}
+                  <div style={{ padding: '24px', background: 'var(--color-bg-primary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                      <span className="material-symbols-outlined" style={{ color: 'var(--color-accent-primary)' }}>layers</span>
+                      <h3 className="text-h2" style={{ margin: 0, fontSize: '20px' }}>Capa de Sombras (Archivo B)</h3>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <input
+                        id="shadowFile"
+                        type="file"
+                        accept=".svg"
+                        onChange={handleShadowUpload}
+                        disabled={uploading}
+                        style={{ display: 'none' }}
+                      />
+                      <label
+                        htmlFor="shadowFile"
+                        className="minimal-button-primary"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          width: '100%',
+                          justifyContent: 'center',
+                          padding: '14px',
+                          background: '#1A535C',
+                          borderColor: '#1A535C'
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>layers</span>
+                        <span style={{ fontSize: '16px', fontWeight: 600 }}>
+                          {formData.shadowContent ? 'CAMBIAR ARCHIVO DE SOMBRAS (.SVG)' : 'SUBIR ARCHIVO DE SOMBRAS (.SVG)'}
+                        </span>
+                      </label>
+                    </div>
+
+                    <label htmlFor="shadowContent" className="text-small" style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                      Código SVG Sombras (Opcional)
+                    </label>
+                    <textarea
+                      id="shadowContent"
+                      value={formData.shadowContent}
+                      onChange={(e) => setFormData({ ...formData, shadowContent: e.target.value })}
+                      placeholder='Los detalles de sombras aparecerán aquí al subir...'
+                      disabled={uploading}
+                      rows={5}
+                      className="minimal-input"
+                      style={{ resize: 'vertical', fontFamily: 'monospace', fontSize: '12px', background: 'var(--color-bg-tertiary)' }}
+                    />
+                  </div>
+
+                  {/* SVG Preview Combined */}
+                  {formData.svgContent && (
+                    <div style={{
+                      padding: '24px',
+                      background: 'var(--color-bg-tertiary)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '2px dashed var(--color-border)'
+                    }}>
+                      <h3 className="text-h3" style={{
+                        margin: '0 0 16px 0',
+                        color: 'var(--color-text-secondary)'
+                      }}>
+                        Vista Previa {formData.shadowContent ? '(Combinada)' : ''}
+                      </h3>
+                      <div
+                        style={{
+                          maxWidth: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          position: 'relative',
+                          aspectRatio: '1/1',
+                          maxHeight: '400px'
+                        }}
+                      >
+                        <div
+                          dangerouslySetInnerHTML={{ __html: formData.svgContent }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
+                        {formData.shadowContent && (
+                          <div
+                            className="svg-shadow-overlay"
+                            dangerouslySetInnerHTML={{ __html: formData.shadowContent }}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              pointerEvents: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message */}
+                  {message && (
+                    <div style={{
+                      padding: '12px 16px',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      background: message.includes('Error') ? '#FEE2E2' : '#D1FAE5',
+                      color: message.includes('Error') ? '#991B1B' : '#065F46',
+                      border: `1px solid ${message.includes('Error') ? '#FCA5A5' : '#6EE7B7'}`
+                    }}>
+                      {message}
+                    </div>
+                  )}
+
+                  <button type="submit" className="minimal-button-primary" disabled={uploading} style={{ width: '100%' }}>
+                    {uploading ? (editingId ? 'Actualizando...' : 'Subiendo...') : (editingId ? 'Actualizar Plantilla' : 'Subir Plantilla')}
+                  </button>
+                </form>
+              </section>
+
+              {/* Templates List */}
+              <section>
+                <div style={{ marginBottom: '24px' }}>
+                  <h2 className="text-h2" style={{ margin: 0 }}>
+                    Plantillas Existentes ({templates.length})
+                  </h2>
+                </div>
+
+                {loading ? (
+                  <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-secondary)' }}>Cargando...</div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '24px'
+                  }}>
+                    {templates.map((template) => (
+                      <div key={template.id} className="minimal-card" style={{ padding: 0, overflow: 'hidden' }}>
+                        <div style={{ background: 'var(--color-bg-tertiary)', padding: '24px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div dangerouslySetInnerHTML={{ __html: template.svg_content }} style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                        </div>
+                        <div style={{ padding: '16px' }}>
+                          <h3 className="text-h3" style={{ margin: '0 0 8px 0', fontSize: '16px' }}>{template.title}</h3>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '12px', padding: '2px 8px', borderRadius: '4px', background: 'var(--color-bg-secondary)' }}>{template.category}</span>
+                            <span style={{ fontSize: '12px', padding: '2px 8px', borderRadius: '4px', background: '#E0E7FF' }}>{template.difficulty}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleEdit(template)} className="minimal-button-secondary" style={{ flex: 1, padding: '8px 4px', fontSize: '13px' }}>Editar</button>
+                            <button onClick={() => toggleTemplateStatus(template.id, template.is_active)} className="minimal-button-secondary" style={{ flex: 1, padding: '8px 4px', fontSize: '13px' }}>{template.is_active ? 'Desactivar' : 'Activar'}</button>
+                            <button onClick={() => deleteTemplate(template.id)} className="minimal-button-secondary" style={{ flex: '0 0 40px', padding: '8px 4px', color: '#EF4444' }}>
+                              <span className="material-symbols-outlined">delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
+
+          {/* Users View */}
+          {activeTab === 'users' && (
+            <div style={{ maxWidth: '1200px' }}>
+              <h2 className="text-h2" style={{ marginBottom: '24px' }}>Gestión de Usuarios</h2>
+              <div className="minimal-card" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--color-border)' }}>
+                      <th style={{ padding: '16px' }}>Email</th>
+                      <th style={{ padding: '16px' }}>Rol</th>
+                      <th style={{ padding: '16px' }}>Fecha Registro</th>
+                      <th style={{ padding: '16px', textAlign: 'right' }}>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allUsers.map(u => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '16px' }}>{u.email}</td>
+                        <td style={{ padding: '16px' }}>
+                          <span style={{
+                            padding: '4px 12px',
+                            borderRadius: '100px',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            background: u.role === 'admin' ? '#FEE2E2' : '#E0E7FF',
+                            color: u.role === 'admin' ? '#991B1B' : '#4338CA'
+                          }}>
+                            {u.role?.toUpperCase() || 'USER'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '16px', color: 'var(--color-text-tertiary)' }}>
+                          {new Date(u.created_at).toLocaleDateString()}
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right' }}>
+                          <button
+                            className="minimal-button-secondary"
+                            style={{ fontSize: '12px', padding: '4px 12px' }}
+                            onClick={async () => {
+                              const newRole = u.role === 'admin' ? 'user' : 'admin';
+                              const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', u.id);
+                              if (error) alert(error.message);
+                              else await loadData();
+                            }}
+                          >
+                            Hacer {u.role === 'admin' ? 'Usuario' : 'Admin'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Settings View */}
+          {activeTab === 'settings' && (
+            <div style={{ maxWidth: '1200px' }}>
+              <h2 className="text-h2" style={{ marginBottom: '24px' }}>Configuración del Sistema</h2>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
+                {/* Categories Management */}
+                <div className="minimal-card" style={{ padding: '32px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <h3 className="text-h3" style={{ margin: 0 }}>Categorías</h3>
+                    <button
+                      className="minimal-button-primary"
+                      style={{ padding: '8px 16px', fontSize: '13px' }}
+                      onClick={() => {
+                        const name = prompt('Nombre de la nueva categoría:');
+                        if (name) {
+                          supabase.from('app_categories').insert({ name }).then(() => loadData());
+                        }
+                      }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span> Nueva
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                    {categories.map(cat => (
+                      <div key={cat.id} style={{
+                        padding: '8px 16px',
+                        background: 'var(--color-bg-secondary)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '100px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span>{cat.name}</span>
+                        <button
+                          onClick={() => {
+                            if (confirm('¿Eliminar categoría?'))
+                              supabase.from('app_categories').delete().eq('id', cat.id).then(() => loadData());
+                          }}
+                          style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: 0, display: 'flex' }}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Difficulties Management */}
+                <div className="minimal-card" style={{ padding: '32px', opacity: 0.7 }}>
+                  <h3 className="text-h3" style={{ marginBottom: '16px' }}>Niveles de Dificultad</h3>
+                  <p className="text-small" style={{ marginBottom: '20px' }}>Los niveles están predefinidos para asegurar la consistencia visual del sistema.</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {difficulties.map(diff => (
+                      <div key={diff.id} style={{
+                        padding: '12px 16px',
+                        background: 'var(--color-bg-secondary)',
+                        borderRadius: 'var(--radius-md)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: diff.color }}></div>
+                          <span style={{ fontWeight: 600 }}>{diff.label}</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Orden: {diff.order}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
+    </div>
   );
 };
 
