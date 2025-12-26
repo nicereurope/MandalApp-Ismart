@@ -42,6 +42,8 @@ const ScreenColoring: React.FC = () => {
   // Cursor state for brush/grab detection
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [cursorMode, setCursorMode] = useState<'brush' | 'grabbing'>('brush');
+  const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Custom brush cursor SVG
   const brushCursor = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%234ECDC4' stroke='%23000' stroke-width='1' d='M8.5 21C6 21 4 19 4 16.5c0-1.5.5-3 1.5-4L18 1l5 5-11.5 11.5c-1 1-2.5 1.5-4 1.5z'/%3E%3Ccircle cx='8' cy='16' r='2' fill='%23fff' opacity='0.7'/%3E%3C/svg%3E\") 4 20, auto";
@@ -328,9 +330,30 @@ const ScreenColoring: React.FC = () => {
     setHistory(prev => prev.slice(0, -1));
   };
 
+  // Wheel zoom handler
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -10 : 10;
+    setZoom(prev => {
+      const newZoom = Math.min(300, Math.max(50, prev + delta));
+      if (newZoom === 100) setPanOffset({ x: 0, y: 0 });
+      return newZoom;
+    });
+  };
+
   // Pan handlers
   const handlePanStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsMouseDown(true);
+
+    if ('touches' in e && e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setLastTouchDistance(dist);
+      setIsPanning(false);
+      return;
+    }
 
     // If zoomed, enable panning and change cursor
     if (zoom > 100) {
@@ -350,16 +373,31 @@ const ScreenColoring: React.FC = () => {
       setCursorMode('grabbing');
       setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
     } else {
-      // Not zoomed, set cursor to grabbing after a delay
       setTimeout(() => {
-        if (isMouseDown) {
-          setCursorMode('grabbing');
-        }
-      }, 150); // 150ms delay to differentiate click from drag
+        if (isMouseDown) setCursorMode('grabbing');
+      }, 150);
     }
   };
 
   const handlePanMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e && e.touches.length === 2 && lastTouchDistance !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const delta = dist - lastTouchDistance;
+
+      if (Math.abs(delta) > 5) {
+        setZoom(prev => {
+          const newZoom = Math.min(300, Math.max(50, prev + (delta > 0 ? 5 : -5)));
+          if (newZoom === 100) setPanOffset({ x: 0, y: 0 });
+          return newZoom;
+        });
+        setLastTouchDistance(dist);
+      }
+      return;
+    }
+
     if (!isPanning && zoom <= 100) return;
 
     let clientX: number;
@@ -375,9 +413,15 @@ const ScreenColoring: React.FC = () => {
     }
 
     if (zoom > 100) {
+      // Constrain pan offset to prevent losing the canvas
+      // We allow panning roughly half the canvas size in any direction
+      const maxPan = 500;
+      const newX = clientX - panStart.x;
+      const newY = clientY - panStart.y;
+
       setPanOffset({
-        x: clientX - panStart.x,
-        y: clientY - panStart.y
+        x: Math.min(maxPan, Math.max(-maxPan, newX)),
+        y: Math.min(maxPan, Math.max(-maxPan, newY))
       });
     }
   };
@@ -385,6 +429,7 @@ const ScreenColoring: React.FC = () => {
   const handlePanEnd = () => {
     setIsMouseDown(false);
     setIsPanning(false);
+    setLastTouchDistance(null);
     setCursorMode('brush');
   };
 
@@ -517,6 +562,8 @@ const ScreenColoring: React.FC = () => {
         {/* Canvas */}
         <div
           id="tour-canvas"
+          ref={containerRef}
+          onWheel={handleWheel}
           style={{
             maxWidth: 'min(90vw, 700px)',
             maxHeight: 'min(90vh, 700px)',
