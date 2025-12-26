@@ -28,7 +28,7 @@
 
 ### 2. Branding Implementation
 - Changed Hero title from "Galería de Arte Zen" to **"GUDIÑO Y TÚ"**.
-- Added subtitle: **"Atelier y galeria de arte"**.
+- Added subtitle: **"Arte colaborativo"**.
 - Updated description: **"Personaliza y comparte tu arte para relajarte e inspirar"**.
 
 ### 3. Consistency Pass

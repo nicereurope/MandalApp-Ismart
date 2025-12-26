@@ -14,7 +14,7 @@ Read in this order:
 **Tech Stack:** React + TypeScript + Vite + Supabase + Vercel  
 **Deployed URL:** https://mandalapp-ismart.vercel.app  
 **Supabase Project ID:** xfomkgtsecfnzjsbpipc  
-**Branding:** "GUDIÑO Y TÚ" - Atelier y galeria de arte  
+**Branding:** "GUDIÑO Y TÚ" - Arte colaborativo  
 
 ---
 

@@ -411,7 +411,7 @@ const ScreenHome: React.FC = () => {
             textTransform: 'uppercase',
             letterSpacing: '2px'
           }}>
-            Atelier y galeria de arte
+            Arte colaborativo
           </p>
           <p className="text-body" style={{
             color: 'var(--color-text-secondary)',
