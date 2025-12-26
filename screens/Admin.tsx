@@ -251,7 +251,7 @@ const ScreenAdmin: React.FC = () => {
     }}>
       <MinimalAdminHeader />
 
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 16px' }}>
         {/* Upload Form */}
         <section className="minimal-card" style={{ marginBottom: '48px', padding: '32px' }}>
           <div style={{
@@ -321,7 +321,7 @@ const ScreenAdmin: React.FC = () => {
             </div>
 
             {/* Difficulty & Category Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div>
                 <label htmlFor="difficulty" className="text-small" style={{
                   display: 'block',
@@ -376,7 +376,7 @@ const ScreenAdmin: React.FC = () => {
               }}>
                 Color de Fondo (Preview)
               </label>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   id="backgroundColor"
                   type="color"

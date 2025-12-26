@@ -284,7 +284,7 @@ const ScreenGallery: React.FC = () => {
     }}>
       <MinimalHeader />
 
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 24px' }}>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 16px', paddingBottom: '80px' }}>
         {/* Hero Section */}
         <div style={{
           textAlign: 'center',
