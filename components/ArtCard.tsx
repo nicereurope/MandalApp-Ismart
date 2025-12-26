@@ -57,7 +57,7 @@ const ArtCard: React.FC<ArtCardProps> = ({
       <div
         style={{
           width: '100%',
-          aspectRatio: '1/1',
+          minHeight: '200px',
           padding: '24px',
           display: 'flex',
           alignItems: 'center',
@@ -67,15 +67,15 @@ const ArtCard: React.FC<ArtCardProps> = ({
         }}
       >
         <div
+          dangerouslySetInnerHTML={{ __html: svgContent }}
           style={{
             width: '100%',
-            height: '100%',
-            opacity: 0.85,
-            transition: 'opacity 0.3s'
+            height: 'auto',
+            maxHeight: '400px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
-          dangerouslySetInnerHTML={{ __html: svgContent }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.85'}
         />
 
         {/* Difficulty Badge */}

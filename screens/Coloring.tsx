@@ -429,15 +429,18 @@ const ScreenColoring: React.FC = () => {
         {/* Canvas */}
         <div
           style={{
-            width: 'min(90vw, 90vh, 700px)',
-            maxWidth: '100%',
-            aspectRatio: '1/1',
+            maxWidth: 'min(90vw, 700px)',
+            maxHeight: 'min(90vh, 700px)',
+            width: 'fit-content',
             background: 'white',
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-md)',
             overflow: 'hidden',
             cursor: zoom > 100 ? (isPanning ? 'grabbing' : 'grab') : 'crosshair',
-            touchAction: 'none'
+            touchAction: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           onMouseDown={handlePanStart}
           onMouseMove={handlePanMove}

@@ -372,10 +372,14 @@ const ScreenGallery: React.FC = () => {
               <div key={creation.id} className="minimal-card" style={{ padding: 0, overflow: 'hidden' }}>
                 {/* Image */}
                 <div style={{
-                  aspectRatio: '1/1',
+                  width: '100%',
+                  minHeight: '200px',
                   background: 'var(--color-bg-tertiary)',
                   overflow: 'hidden',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                   onClick={() => setSelectedCreation(creation)}>
                   <img
@@ -383,8 +387,9 @@ const ScreenGallery: React.FC = () => {
                     alt={creation.title || 'Artwork'}
                     style={{
                       width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
+                      height: 'auto',
+                      maxHeight: '400px',
+                      objectFit: 'contain',
                       transition: 'transform 0.3s'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
