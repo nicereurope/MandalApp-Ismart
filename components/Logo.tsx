@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import HeartIcon from './HeartIcon';
 
-// v2.0 - Logo with fallback to HeartIcon + text - Updated 2025-12-25
+// v3.0 - Logo using ThemeContext instead of system prefers-color-scheme - Updated 2025-12-26
 
 interface LogoProps {
     size?: number;
@@ -9,21 +10,11 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ size = 120, className = '' }) => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const { darkMode } = useTheme();
     const [imageError, setImageError] = useState(false);
 
-    useEffect(() => {
-        // Detect dark mode
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        setIsDarkMode(mediaQuery.matches);
-
-        const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-        mediaQuery.addEventListener('change', handler);
-        return () => mediaQuery.removeEventListener('change', handler);
-    }, []);
-
-    // Try multiple paths for Vercel compatibility
-    const logoPath = isDarkMode ? '/img/logo_white.svg' : '/img/logo_black.svg';
+    // Use white logo for dark mode, black logo for light mode
+    const logoPath = darkMode ? '/img/logo_white.svg' : '/img/logo_black.svg';
 
     // Fallback component if image fails to load
     if (imageError) {
@@ -41,7 +32,7 @@ const Logo: React.FC<LogoProps> = ({ size = 120, className = '' }) => {
                 <span style={{
                     fontSize: size * 0.3,
                     fontWeight: 700,
-                    color: isDarkMode ? '#ffffff' : '#000000',
+                    color: darkMode ? '#ffffff' : '#000000',
                     fontFamily: 'Inter, sans-serif'
                 }}>
                     GUDIÑO

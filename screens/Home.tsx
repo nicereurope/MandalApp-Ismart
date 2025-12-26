@@ -4,11 +4,13 @@ import ArtCard from '../components/ArtCard';
 import Logo from '../components/Logo';
 import HeartIcon from '../components/HeartIcon';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { supabase, SvgTemplate } from '../lib/supabase';
 import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
   const { user, isAdmin, signOut } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
@@ -90,14 +92,34 @@ const MinimalHeader: React.FC = () => {
               </button>
             </>
           ) : (
-            <button
-              onClick={() => navigate('/auth')}
-              className="minimal-button-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
-              <span>Login</span>
-            </button>
+            <>
+              {/* Theme toggle for non-logged users */}
+              <button
+                onClick={toggleTheme}
+                className="minimal-button-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '40px',
+                  height: '40px'
+                }}
+                title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                  {darkMode ? 'light_mode' : 'dark_mode'}
+                </span>
+              </button>
+
+              <button
+                onClick={() => navigate('/auth')}
+                className="minimal-button-primary"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>login</span>
+                <span>Login</span>
+              </button>
+            </>
           )}
         </nav>
       </div>
