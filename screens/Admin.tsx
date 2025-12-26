@@ -447,17 +447,17 @@ const ScreenAdmin: React.FC = () => {
               }}>
                 <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--color-accent-primary)', marginBottom: '16px' }}>palette</span>
-                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.templates}</div>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', color: 'var(--color-text-primary)' }}>{stats.templates}</div>
                   <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Plantillas Base</div>
                 </div>
                 <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#1A535C', marginBottom: '16px' }}>brush</span>
-                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.creations}</div>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#10B981', marginBottom: '16px' }}>brush</span>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', color: 'var(--color-text-primary)' }}>{stats.creations}</div>
                   <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Obras Coloreadas</div>
                 </div>
                 <div className="minimal-card" style={{ padding: '32px', textAlign: 'center' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#FF6B6B', marginBottom: '16px' }}>group</span>
-                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px' }}>{stats.users}</div>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#6366F1', marginBottom: '16px' }}>group</span>
+                  <div style={{ fontSize: '36px', fontWeight: 800, marginBottom: '4px', color: 'var(--color-text-primary)' }}>{stats.users}</div>
                   <div className="text-body" style={{ color: 'var(--color-text-secondary)' }}>Usuarios Registrados</div>
                 </div>
               </div>
