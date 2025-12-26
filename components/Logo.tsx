@@ -45,10 +45,9 @@ const Logo: React.FC<LogoProps> = ({ size = 120, className = '' }) => {
         <img
             src={logoPath}
             alt="Gudiño"
-            className={className}
+            className={`logo-responsive ${className}`}
             onError={() => setImageError(true)}
             style={{
-                height: size,
                 width: 'auto',
                 display: 'block'
             }}

@@ -22,14 +22,15 @@ const MinimalHeader: React.FC = () => {
       background: 'var(--color-bg-primary)',
       borderBottom: '1px solid var(--color-border-light)',
     }}>
-      <div style={{
+      <div className="header-container" style={{
         position: 'relative',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '20px 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         {/* Logo */}
         <Link to="/" style={{

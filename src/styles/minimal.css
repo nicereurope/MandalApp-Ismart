@@ -293,3 +293,24 @@
   border-color: var(--color-accent-primary);
   box-shadow: 0 0 0 3px rgba(245, 58, 125, 0.1);
 }
+/* Logo Responsive */
+.logo-responsive {
+  max-height: 120px;
+}
+
+@media (max-width: 768px) {
+  .logo-responsive {
+    max-height: 60px !important;
+  }
+}
+
+/* Header Padding Responsive */
+.header-container {
+  padding: 20px 24px;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 12px 16px !important;
+  }
+}
