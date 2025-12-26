@@ -10,7 +10,7 @@ import Logo from '../components/Logo';
 import '../src/styles/minimal.css';
 
 const MinimalHeader: React.FC = () => {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isLoading, signOut } = useAuth();
   const { darkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -116,7 +116,7 @@ const MinimalHeader: React.FC = () => {
                 <span>Salir</span>
               </button>
             </>
-          ) : (
+          ) : !isLoading ? (
             <>
               <button
                 onClick={() => navigate('/auth')}
@@ -127,6 +127,8 @@ const MinimalHeader: React.FC = () => {
                 <span>Login</span>
               </button>
             </>
+          ) : (
+            <div style={{ width: '40px' }}></div> // Spacer while loading
           )}
         </nav>
       </div>
