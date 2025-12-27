@@ -122,6 +122,7 @@ const ScreenAdmin: React.FC = () => {
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [userSearch, setUserSearch] = useState('');
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [allowRegistration, setAllowRegistration] = useState(true);
 
   const loadData = async () => {
     setLoading(true);
@@ -145,6 +146,10 @@ const ScreenAdmin: React.FC = () => {
       setCategories(catData || []);
       const { data: diffData } = await supabase.from('app_difficulties').select('*').order('order');
       setDifficulties(diffData || []);
+
+      // 5. Settings
+      const { data: sData } = await supabase.from('app_settings').select('*').eq('key', 'allow_registration').single();
+      if (sData) setAllowRegistration(sData.value === true || sData.value === 'true');
 
     } catch (error: any) {
       console.error('Error loading data:', error);
@@ -988,14 +993,34 @@ const ScreenAdmin: React.FC = () => {
                       />
                       <label htmlFor="user-active-toggle" style={{ fontWeight: 600 }}>Usuario Activo</label>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '20px' }}>
+                      <input
+                        type="checkbox"
+                        id="user-blocked-toggle"
+                        checked={editingUser.is_blocked === true}
+                        onChange={(e) => setEditingUser({ ...editingUser, is_blocked: e.target.checked })}
+                        style={{ width: '20px', height: '20px' }}
+                      />
+                      <label htmlFor="user-blocked-toggle" style={{ fontWeight: 600, color: editingUser.is_blocked ? '#DC2626' : 'inherit' }}>
+                        {editingUser.is_blocked ? 'Bloqueado (Click para desbloquear)' : 'Estado: Acceso Permitido'}
+                      </label>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, gap: '12px' }}>
+                      <button
+                        className="minimal-button-secondary"
+                        style={{ flex: 1, padding: '10px' }}
+                        onClick={() => setEditingUser(null)}
+                      >
+                        Cancelar
+                      </button>
                       <button
                         className="minimal-button-primary"
-                        style={{ width: '100%', padding: '10px' }}
+                        style={{ flex: 2, padding: '10px' }}
                         onClick={async () => {
                           const { error } = await supabase.from('profiles').update({
                             role: editingUser.role,
-                            is_active: editingUser.is_active
+                            is_active: editingUser.is_active,
+                            is_blocked: editingUser.is_blocked
                           }).eq('id', editingUser.id);
 
                           if (error) alert(error.message);
@@ -1096,8 +1121,58 @@ const ScreenAdmin: React.FC = () => {
 
           {/* Settings View */}
           {activeTab === 'settings' && (
-            <div style={{ maxWidth: '1200px' }}>
-              <h2 className="text-h2" style={{ marginBottom: '24px' }}>Configuración del Sistema</h2>
+            <div style={{ maxWidth: '1000px' }}>
+              <h2 className="text-h2" style={{ marginBottom: '32px' }}>Ajustes del Sistema</h2>
+
+              <section className="minimal-card" style={{ padding: '32px', marginBottom: '32px' }}>
+                <h3 className="text-h3" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span className="material-symbols-outlined">security</span>
+                  Seguridad y Registro
+                </h3>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '20px',
+                  background: 'var(--color-bg-secondary)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--color-border-light)'
+                }}>
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: '4px', color: 'var(--color-text-primary)' }}>Permitir Registro Público</div>
+                    <div style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Si se desactiva, solo los usuarios existentes podrán entrar y no se podrán crear cuentas nuevas.</div>
+                  </div>
+                  <div
+                    onClick={async () => {
+                      const newValue = !allowRegistration;
+                      const { error } = await supabase.from('app_settings').upsert({ key: 'allow_registration', value: newValue });
+                      if (error) alert(error.message);
+                      else setAllowRegistration(newValue);
+                    }}
+                    style={{
+                      width: '60px',
+                      height: '32px',
+                      background: allowRegistration ? 'var(--color-accent-primary)' : 'var(--color-border)',
+                      borderRadius: '100px',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s'
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute',
+                      left: allowRegistration ? '32px' : '4px',
+                      top: '4px',
+                      width: '24px',
+                      height: '24px',
+                      background: '#FFFFFF',
+                      borderRadius: '50%',
+                      transition: 'all 0.3s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}></div>
+                  </div>
+                </div>
+              </section>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
                 {/* Categories Management */}

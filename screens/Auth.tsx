@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { supabase } from '../lib/supabase';
 import '../src/styles/minimal.css';
 
 const ScreenAuth: React.FC = () => {
@@ -12,6 +13,16 @@ const ScreenAuth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const [allowRegistration, setAllowRegistration] = useState(true);
+
+  React.useEffect(() => {
+    const checkSettings = async () => {
+      const { data } = await supabase.from('app_settings').select('value').eq('key', 'allow_registration').single();
+      if (data) setAllowRegistration(data.value === true || data.value === 'true');
+    };
+    checkSettings();
+  }, []);
+
   const [searchParams] = useSearchParams();
   const redirectPath = searchParams.get('redirect');
 
@@ -21,6 +32,12 @@ const ScreenAuth: React.FC = () => {
     setLoading(true);
 
     try {
+      if (!isLogin && !allowRegistration) {
+        setError('El registro de nuevos usuarios está deshabilitado temporalmente.');
+        setLoading(false);
+        return;
+      }
+
       const { error } = isLogin
         ? await signIn(email, password)
         : await signUp(email, password);
@@ -31,6 +48,23 @@ const ScreenAuth: React.FC = () => {
         if (!isLogin) {
           setError('¡Registro exitoso! Por favor verifica tu email.');
         } else {
+          // Check if blocked immediately after sign in
+          const { data: profile } = await supabase.from('profiles').select('is_blocked, is_active').eq('email', email).single();
+
+          if (profile?.is_blocked) {
+            await supabase.auth.signOut();
+            setError('Tu acceso ha sido bloqueado por seguridad. Contacta al administrador.');
+            setLoading(false);
+            return;
+          }
+
+          if (profile?.is_active === false) {
+            await supabase.auth.signOut();
+            setError('Tu cuenta está inactiva. Contacta al administrador.');
+            setLoading(false);
+            return;
+          }
+
           navigate(redirectPath || '/');
         }
       }
@@ -95,94 +129,117 @@ const ScreenAuth: React.FC = () => {
             <p className="text-body" style={{ color: 'var(--color-text-secondary)' }}>
               {isLogin
                 ? 'Bienvenido de vuelta'
-                : 'Únete a nuestra comunidad artística'
+                : allowRegistration
+                  ? 'Únete a nuestra comunidad artística'
+                  : 'El registro no está disponible'
               }
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Email */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label
-                htmlFor="email"
-                className="text-small"
-                style={{
-                  fontWeight: 600,
-                  color: 'var(--color-text-primary)'
-                }}
+          {!isLogin && !allowRegistration ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '24px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              color: '#B91C1C'
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', marginBottom: '12px' }}>no_accounts</span>
+              <p style={{ fontWeight: 600 }}>Registro deshabilitado</p>
+              <p className="text-small" style={{ marginTop: '8px' }}>El administrador ha pausado la creación de nuevas cuentas. Intenta más tarde.</p>
+              <button
+                onClick={() => setIsLogin(true)}
+                className="minimal-button-secondary"
+                style={{ marginTop: '16px', width: '100%' }}
               >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="tu@email.com"
-                disabled={loading}
-                className="minimal-input"
-              />
+                Volver al Login
+              </button>
             </div>
-
-            {/* Password */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label
-                htmlFor="password"
-                className="text-small"
-                style={{
-                  fontWeight: 600,
-                  color: 'var(--color-text-primary)'
-                }}
-              >
-                Contraseña
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                minLength={6}
-                disabled={loading}
-                className="minimal-input"
-              />
-            </div>
-
-            {/* Error/Success Message */}
-            {error && (
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-md)',
-                fontSize: '14px',
-                fontWeight: 500,
-                background: error.includes('exitoso') ? '#D1FAE5' : '#FEE2E2',
-                color: error.includes('exitoso') ? '#065F46' : '#991B1B',
-                border: `1px solid ${error.includes('exitoso') ? '#6EE7B7' : '#FCA5A5'}`
-              }}>
-                {error}
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Email */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label
+                  htmlFor="email"
+                  className="text-small"
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)'
+                  }}
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="tu@email.com"
+                  disabled={loading}
+                  className="minimal-input"
+                />
               </div>
-            )}
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="minimal-button-primary"
-              disabled={loading}
-              style={{ width: '100%' }}
-            >
-              {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>sync</span>
-                  Cargando...
-                </span>
-              ) : (
-                isLogin ? 'Iniciar Sesión' : 'Registrarse'
+              {/* Password */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label
+                  htmlFor="password"
+                  className="text-small"
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)'
+                  }}
+                >
+                  Contraseña
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  minLength={6}
+                  disabled={loading}
+                  className="minimal-input"
+                />
+              </div>
+
+              {/* Error/Success Message */}
+              {error && (
+                <div style={{
+                  padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  background: error.includes('exitoso') ? '#D1FAE5' : '#FEE2E2',
+                  color: error.includes('exitoso') ? '#065F46' : '#991B1B',
+                  border: `1px solid ${error.includes('exitoso') ? '#6EE7B7' : '#FCA5A5'}`
+                }}>
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="minimal-button-primary"
+                disabled={loading}
+                style={{ width: '100%' }}
+              >
+                {loading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>sync</span>
+                    Cargando...
+                  </span>
+                ) : (
+                  isLogin ? 'Iniciar Sesión' : 'Registrarse'
+                )}
+              </button>
+            </form>
+          )}
 
           {/* Switch Login/Register */}
           <div style={{

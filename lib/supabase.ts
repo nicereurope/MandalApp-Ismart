@@ -19,6 +19,8 @@ export type Profile = {
     role: 'user' | 'admin';
     created_at: string;
     updated_at: string;
+    is_active?: boolean;
+    is_blocked?: boolean;
 };
 
 export type SvgTemplate = {
