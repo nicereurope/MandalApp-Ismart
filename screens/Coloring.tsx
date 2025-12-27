@@ -44,6 +44,8 @@ const ScreenColoring: React.FC = () => {
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [cursorMode, setCursorMode] = useState<'brush' | 'grabbing'>('brush');
   const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+  const [hasMoved, setHasMoved] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -311,7 +313,10 @@ const ScreenColoring: React.FC = () => {
 
   // Canvas interaction
   const handleCanvasInteraction = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (isDrawing) return;
+    if (isDrawing || hasMoved) {
+      setHasMoved(false);
+      return;
+    }
     setIsDrawing(true);
 
     const canvas = canvasRef.current;
@@ -324,7 +329,8 @@ const ScreenColoring: React.FC = () => {
       if (e.touches.length === 0) return;
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
-      e.preventDefault();
+      // We don't preventDefault here to allow click event to fire if needed, 
+      // but we removed onTouchStart from canvas anyway.
     } else {
       clientX = e.clientX;
       clientY = e.clientY;
@@ -369,31 +375,34 @@ const ScreenColoring: React.FC = () => {
   // Pan handlers
   const handlePanStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsMouseDown(true);
+    setHasMoved(false);
 
-    if ('touches' in e && e.touches.length === 2) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      setLastTouchDistance(dist);
-      setIsPanning(false);
-      return;
+    let clientX: number;
+    let clientY: number;
+
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+
+      if (e.touches.length === 2) {
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        setLastTouchDistance(dist);
+        setIsPanning(false);
+        return;
+      }
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
     }
+
+    setStartPos({ x: clientX, y: clientY });
 
     // If zoomed, enable panning and change cursor
     if (zoom > 100) {
-      let clientX: number;
-      let clientY: number;
-
-      if ('touches' in e) {
-        if (e.touches.length === 0) return;
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-      }
-
       setIsPanning(true);
       setCursorMode('grabbing');
       setPanStart({ x: clientX - panOffset.x, y: clientY - panOffset.y });
@@ -423,8 +432,6 @@ const ScreenColoring: React.FC = () => {
       return;
     }
 
-    if (!isPanning) return;
-
     let clientX: number;
     let clientY: number;
 
@@ -437,20 +444,25 @@ const ScreenColoring: React.FC = () => {
       clientY = e.clientY;
     }
 
-    if (zoom > 100) {
-      // Constrain pan offset to prevent losing the canvas
-      // Normalize pan speed: the higher the zoom, the slower the relative pan move
-      const scale = zoom / 100;
-      const dx = (clientX - panStart.x) / scale;
-      const dy = (clientY - panStart.y) / scale;
-
-      const maxPan = 600;
-
-      setPanOffset({
-        x: Math.min(maxPan, Math.max(-maxPan, dx)),
-        y: Math.min(maxPan, Math.max(-maxPan, dy))
-      });
+    // Check if we moved enough to call it a pan/drag (threshold of 5px)
+    if (Math.hypot(clientX - startPos.x, clientY - startPos.y) > 5) {
+      setHasMoved(true);
     }
+
+    if (!isPanning || zoom <= 100) return;
+
+    // Constrain pan offset to prevent losing the canvas
+    // Normalize pan speed: the higher the zoom, the slower the relative pan move
+    const scale = zoom / 100;
+    const dx = (clientX - panStart.x) / scale;
+    const dy = (clientY - panStart.y) / scale;
+
+    const maxPan = 600;
+
+    setPanOffset({
+      x: Math.min(maxPan, Math.max(-maxPan, dx)),
+      y: Math.min(maxPan, Math.max(-maxPan, dy))
+    });
   };
 
   const handlePanEnd = () => {
@@ -734,7 +746,6 @@ const ScreenColoring: React.FC = () => {
             <canvas
               ref={canvasRef}
               onClick={handleCanvasInteraction}
-              onTouchStart={handleCanvasInteraction}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
